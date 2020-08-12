@@ -1,0 +1,3 @@
+include ':bridge'
+include ':app'
+rootProject.name = "trpgo"

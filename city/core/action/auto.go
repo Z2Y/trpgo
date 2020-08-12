@@ -1,0 +1,130 @@
+package action
+
+import (
+	"math/rand"
+
+	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/engo/common"
+)
+
+const (
+	ActionIdle = iota
+	ActionWalking
+)
+
+type ActionEntity struct {
+	ecs.BasicEntity
+	common.SpaceComponent
+	WalkComponent
+
+	ActionState
+}
+
+type ActionState struct {
+	Code  int
+	Speed engo.Point
+
+	duration float32
+	elapsed  float32
+}
+
+type ActionMessage struct {
+	*ecs.BasicEntity
+	Code int
+}
+
+func (ActionMessage) Type() string {
+	return "ActionMessage"
+}
+
+type AutoActionSystem struct {
+	entities []*ActionEntity
+
+	walkSys *WalkSystem
+}
+
+type WalkAble interface {
+	Walk(engo.Point)
+}
+
+func NewActionEntity() ActionEntity {
+	return ActionEntity{BasicEntity: ecs.NewBasic()}
+}
+
+func (s *AutoActionSystem) New(w *ecs.World) {
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *WalkSystem:
+			s.walkSys = sys
+		}
+	}
+
+	if s.walkSys == nil {
+		s.walkSys = &WalkSystem{}
+		w.AddSystem(s.walkSys)
+	}
+}
+
+func (s *AutoActionSystem) Add(entity *ActionEntity) {
+	s.entities = append(s.entities, entity)
+	s.walkSys.Add(&entity.BasicEntity, &entity.WalkComponent, &entity.SpaceComponent)
+}
+
+func (s *AutoActionSystem) Remove(basic ecs.BasicEntity) {
+	delete := -1
+	for index, e := range s.entities {
+		if e.ID() == basic.ID() {
+			delete = index
+			break
+		}
+	}
+	if delete >= 0 {
+		s.entities = append(s.entities[:delete], s.entities[delete+1:]...)
+		s.walkSys.Remove(basic)
+	}
+}
+
+func (s *AutoActionSystem) Update(dt float32) {
+	for _, e := range s.entities {
+		preState := e.ActionState.Code
+		e.ActionState.Update(dt)
+		switch e.ActionState.Code {
+		case ActionIdle:
+			if preState != ActionIdle {
+				engo.Mailbox.Dispatch(ActionMessage{BasicEntity: &e.BasicEntity, Code: ActionIdle})
+				engo.Mailbox.Dispatch(WalkMessage{BasicEntity: &e.BasicEntity, Point: e.ActionState.Speed})
+			}
+		case ActionWalking:
+			if e.ActionState.elapsed == 0 {
+				engo.Mailbox.Dispatch(WalkMessage{BasicEntity: &e.BasicEntity, Point: e.ActionState.Speed})
+				engo.Mailbox.Dispatch(ActionMessage{BasicEntity: &e.BasicEntity, Code: ActionWalking})
+			}
+		}
+	}
+}
+
+func (s *ActionState) Update(dt float32) {
+	s.elapsed = s.elapsed + dt
+
+	if s.elapsed >= s.duration {
+		s.Next()
+	}
+}
+
+func (s *ActionState) Next() {
+	s.Code = rand.Intn(2)
+
+	s.Speed.X, s.Speed.Y = 0, 0
+	if s.Code == ActionWalking {
+		s.Speed.X = 0.1 * float32((rand.Intn(3) - 1))
+		s.Speed.Y = 0.1 * float32((rand.Intn(3) - 1))
+	}
+
+	if s.Speed.X == 0 && s.Speed.Y == 0 {
+		s.Code = ActionIdle
+	}
+
+	s.duration = rand.Float32() * 4
+	s.elapsed = 0
+}
