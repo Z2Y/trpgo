@@ -3,6 +3,6 @@ A tiny rpg game made with [golang](https://golang.org) and [engo](https://github
 
 # Roadmap
 
-- [-] Basic map generation
-- [-] Simple npc auto walking
+- [ ] Basic map generation
+- [ ] Simple npc auto walking
 - [ ] Simple Building support
