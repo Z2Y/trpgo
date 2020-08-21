@@ -13,6 +13,8 @@ const (
 	ActionWalking
 )
 
+const ACTION_MESSAGE = "ActionMessage"
+
 type ActionEntity struct {
 	ecs.BasicEntity
 	common.SpaceComponent
@@ -31,11 +33,11 @@ type ActionState struct {
 
 type ActionMessage struct {
 	*ecs.BasicEntity
-	Code int
+	State ActionState
 }
 
 func (ActionMessage) Type() string {
-	return "ActionMessage"
+	return ACTION_MESSAGE
 }
 
 type AutoActionSystem struct {
@@ -92,13 +94,11 @@ func (s *AutoActionSystem) Update(dt float32) {
 		switch e.ActionState.Code {
 		case ActionIdle:
 			if preState != ActionIdle {
-				engo.Mailbox.Dispatch(ActionMessage{BasicEntity: &e.BasicEntity, Code: ActionIdle})
-				engo.Mailbox.Dispatch(WalkMessage{BasicEntity: &e.BasicEntity, Point: e.ActionState.Speed})
+				engo.Mailbox.Dispatch(ActionMessage{BasicEntity: &e.BasicEntity, State: e.ActionState})
 			}
 		case ActionWalking:
 			if e.ActionState.elapsed == 0 {
-				engo.Mailbox.Dispatch(WalkMessage{BasicEntity: &e.BasicEntity, Point: e.ActionState.Speed})
-				engo.Mailbox.Dispatch(ActionMessage{BasicEntity: &e.BasicEntity, Code: ActionWalking})
+				engo.Mailbox.Dispatch(ActionMessage{BasicEntity: &e.BasicEntity, State: e.ActionState})
 			}
 		}
 	}

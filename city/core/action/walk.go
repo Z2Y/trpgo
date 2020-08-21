@@ -4,21 +4,13 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+	"github.com/Z2Y/trpgo/city/core"
 )
 
 const WALK_MESSAGE = "WALK_MESSAGE"
 
 type WalkComponent struct {
 	engo.Point
-}
-
-type WalkMessage struct {
-	*ecs.BasicEntity
-	engo.Point
-}
-
-func (WalkMessage) Type() string {
-	return WALK_MESSAGE
 }
 
 type walkEntity struct {
@@ -30,20 +22,37 @@ type walkEntity struct {
 type WalkSystem struct {
 	ids      map[uint64]struct{}
 	entities []walkEntity
+	land     *core.WorldSystem
 }
 
-func (s *WalkSystem) New(*ecs.World) {
+func (s *WalkSystem) New(w *ecs.World) {
 	s.ids = make(map[uint64]struct{})
-	engo.Mailbox.Listen(WALK_MESSAGE, func(message engo.Message) {
-		speed, isSpeed := message.(WalkMessage)
-		if isSpeed {
+
+	for _, system := range w.Systems() {
+		switch sys := system.(type) {
+		case *core.WorldSystem:
+			s.land = sys
+		}
+	}
+
+	s.listen()
+}
+
+func (s *WalkSystem) listen() {
+	engo.Mailbox.Listen(ACTION_MESSAGE, func(message engo.Message) {
+		msg, isAction := message.(ActionMessage)
+		if isAction {
 			for _, e := range s.entities {
-				if e.ID() == speed.BasicEntity.ID() {
-					e.WalkComponent.Point = speed.Point
+				if e.ID() == msg.BasicEntity.ID() {
+					e.WalkComponent.Point = msg.State.Speed
 				}
 			}
 		}
 	})
+}
+
+func (s *WalkSystem) inBound() {
+
 }
 
 func (s *WalkSystem) Add(basic *ecs.BasicEntity, speed *WalkComponent, space *common.SpaceComponent) {
@@ -70,7 +79,10 @@ func (s *WalkSystem) Remove(basic ecs.BasicEntity) {
 func (s *WalkSystem) Update(dt float32) {
 	for _, e := range s.entities {
 		speed := engo.GameWidth() * dt
-		e.SpaceComponent.Position.X = e.SpaceComponent.Position.X + speed*e.WalkComponent.Point.X
-		e.SpaceComponent.Position.Y = e.SpaceComponent.Position.Y + speed*e.WalkComponent.Point.Y
+		nextPosition := engo.Point{X: e.SpaceComponent.Position.X + speed*e.WalkComponent.Point.X, Y: e.SpaceComponent.Position.Y + speed*e.WalkComponent.Point.Y}
+
+		if nextPosition.Within(s.land) {
+			e.SpaceComponent.Position = nextPosition
+		}
 	}
 }

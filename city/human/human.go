@@ -84,7 +84,7 @@ func (h *Human) listenAction() {
 	engo.Mailbox.Listen("ActionMessage", func(message engo.Message) {
 		msg, isAction := message.(action.ActionMessage)
 		if isAction && h.ID() == msg.BasicEntity.ID() {
-			switch msg.Code {
+			switch msg.State.Code {
 			case action.ActionIdle:
 				h.AnimationComponent = *DefaultAnimation
 			case action.ActionWalking:

@@ -56,6 +56,18 @@ func (w *WorldSystem) Center() engo.Point {
 	return engo.Point{X: w.width / 2, Y: 0}
 }
 
+func (w *WorldSystem) Bounds() engo.AABB {
+	return engo.AABB{
+		Min: engo.Point{X: 0, Y: -w.height / 2},
+		Max: engo.Point{X: w.width, Y: w.height / 2},
+	}
+}
+
+func (w *WorldSystem) Contains(point engo.Point) bool {
+	bounds := w.Bounds()
+	return point.X > bounds.Min.X && point.X < bounds.Max.X && point.Y > bounds.Min.Y && point.Y < bounds.Max.Y
+}
+
 func (w *WorldSystem) Update(float32) {
 	for _, grid := range w.grids {
 		w.renderer.Add(&grid.BasicEntity, grid.RenderComponent, grid.SpaceComponent)
