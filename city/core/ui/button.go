@@ -17,12 +17,15 @@ type Button struct {
 	Width     float32
 	Height    float32
 	TextAlign int
-
-	onClick func()
 }
 
 func (b *Button) OnClick(f func()) {
-	b.onClick = f
+	if b.MessageListener == nil {
+		b.MessageListener = &engo.MessageManager{}
+	}
+	b.MessageListener.Listen("UIMouseEvent", func(engo.Message) {
+		f()
+	})
 }
 
 func NewButton(b Button) *Button {
@@ -40,11 +43,22 @@ func NewButton(b Button) *Button {
 		Scale:    engo.Point{X: b.Width / b.Image.Width(), Y: b.Height / b.Image.Height()},
 	}
 
+	b.SetShader(common.HUDShader)
+	b.SetZIndex(UILayerIndex)
+
 	if b.Text != nil {
 		b.alignText()
 	}
 
 	return &b
+}
+
+func (b *Button) SetPosition(pos engo.Point) {
+	b.Position = pos
+	b.SpaceComponent.Position = pos
+	if b.Text != nil {
+		b.alignText()
+	}
 }
 
 func (b *Button) alignText() {

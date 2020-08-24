@@ -34,7 +34,7 @@ func RegistRenderComponent(code int, d *common.RenderComponent) {
 
 func InitRenderComponents() {
 	// land1, _ := common.LoadedSprite("land/land_1.png")
-	land := common.NewSpritesheetFromFile("land2.png", 64, 64)
+	land := common.NewSpritesheetFromFile("land.png", 64, 64)
 	landScale := engo.Point{X: 1, Y: 1}
 	for i, cell := range land.Cells() {
 		RegistRenderComponent(i, &common.RenderComponent{Scale: landScale, Drawable: cell})

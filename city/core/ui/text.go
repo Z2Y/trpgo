@@ -10,7 +10,8 @@ import (
 )
 
 var (
-	DefaultFont *common.Font
+	DefaultFont    *common.Font
+	TextLayerIndex = float32(100)
 )
 
 type Text struct {
@@ -20,25 +21,26 @@ type Text struct {
 	Value    string
 }
 
-func NewText(position engo.Point, value string) *Text {
-	text := Text{Position: position, Value: value, Font: DefaultFont}
+func NewText(text Text) *Text {
 
 	text.BasicEntity = ecs.NewBasic()
 
-	width, height, _ := text.Font.TextDimensions(value)
+	if text.Font == nil {
+		text.Font = DefaultFont
+	}
+
+	width, height, _ := text.Font.TextDimensions(text.Value)
 
 	text.SpaceComponent = common.SpaceComponent{
 		Width:    float32(width),
 		Height:   float32(height),
-		Position: position,
+		Position: text.Position,
 	}
 
-	text.RenderComponent.Drawable = common.Text{
-		Font: text.Font,
-		Text: text.Value,
-	}
+	text.RenderComponent.Drawable = text.Font.Render(text.Value)
 
-	text.SetShader(common.TextHUDShader)
+	text.SetShader(common.HUDShader)
+	text.SetZIndex(TextLayerIndex)
 
 	return &text
 }
@@ -63,10 +65,7 @@ func (t *Text) update() error {
 		return fmt.Errorf("Text update without setting Font")
 	}
 
-	t.RenderComponent.Drawable = common.Text{
-		Font: t.Font,
-		Text: t.Value,
-	}
+	t.RenderComponent.Drawable = t.Font.Render(t.Value)
 
 	width, height, _ := t.Font.TextDimensions(t.Value)
 
@@ -79,8 +78,8 @@ func (t *Text) update() error {
 func SetDefaultFont(URL string) {
 	fnt := &common.Font{
 		URL:  URL,
-		FG:   color.Black,
-		Size: 64,
+		FG:   color.White,
+		Size: 32,
 	}
 	err := fnt.CreatePreloaded()
 

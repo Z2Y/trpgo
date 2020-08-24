@@ -2,13 +2,29 @@ package ui
 
 import (
 	"github.com/EngoEngine/ecs"
+	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+)
+
+var (
+	UIEntityFace *UIFace
+	UILayerIndex = float32(99)
 )
 
 type UIBasic struct {
 	ecs.BasicEntity
 	common.RenderComponent
 	common.SpaceComponent
+
+	MessageListener *engo.MessageManager
+}
+
+func (u *UIBasic) GetComponentUI() *UIBasic {
+	return u
+}
+
+type UIFace interface {
+	GetComponentUI() *UIBasic
 }
 
 type UISystem struct {
@@ -28,6 +44,13 @@ func (ui *UISystem) New(world *ecs.World) {
 
 func (ui *UISystem) Add(entity *UIBasic) {
 	ui.entities = append(ui.entities, entity)
+
+	ui.renderer.Add(&entity.BasicEntity, &entity.RenderComponent, &entity.SpaceComponent)
+}
+
+func (ui *UISystem) AddByInterface(o ecs.Identifier) {
+	face := o.(UIFace)
+	ui.Add(face.GetComponentUI())
 }
 
 func (ui *UISystem) Remove(basic ecs.BasicEntity) {
@@ -40,11 +63,17 @@ func (ui *UISystem) Remove(basic ecs.BasicEntity) {
 	}
 	if delete >= 0 {
 		ui.entities = append(ui.entities[:delete], ui.entities[delete+1:]...)
+		ui.renderer.Remove(basic)
 	}
 }
 
 func (ui *UISystem) Update(dt float32) {
+	curPos := engo.Point{X: engo.Input.Mouse.X, Y: engo.Input.Mouse.Y}
 	for _, e := range ui.entities {
-		ui.renderer.Add(&e.BasicEntity, &e.RenderComponent, &e.SpaceComponent)
+		if e.Contains(curPos) && e.MessageListener != nil {
+			if engo.Input.Mouse.Action == engo.Press && engo.Input.Mouse.Button == engo.MouseButtonLeft {
+				e.MessageListener.Dispatch(UIMouseEvent{})
+			}
+		}
 	}
 }

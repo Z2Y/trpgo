@@ -52,7 +52,7 @@ func NewHuman(point engo.Point) *Human {
 	entity.RenderComponent = common.RenderComponent{
 		Drawable:    DefaultAnimation.Drawables[0],
 		Scale:       engo.Point{X: 0.5, Y: 0.5},
-		StartZIndex: 100,
+		StartZIndex: 1,
 	}
 
 	entity.SpaceComponent = common.SpaceComponent{
