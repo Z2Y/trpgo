@@ -47,7 +47,7 @@ func (g *Game) Setup(u engo.Updater) {
 	hero := human.NewHuman(g.world.Center())
 
 	w.AddSystem(&common.RenderSystem{})
-	w.AddSystem(&common.FPSSystem{Display: true})
+	w.AddSystem(&common.FPSSystem{Display: true, Font: ui.DefaultFont})
 	w.AddSystem(&common.AnimationSystem{})
 	w.AddSystem(g.world)
 	w.AddSystem(&core.ControlSystem{ZoomSpeed: -0.125})

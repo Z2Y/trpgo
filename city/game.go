@@ -8,8 +8,8 @@ import (
 func Start(width, height int) {
 	opts := engo.RunOptions{
 		Title:        "trpgo",
-		Width:        375,
-		Height:       667,
+		Width:        width,
+		Height:       height,
 		MobileWidth:  width,
 		MobileHeight: height,
 	}
