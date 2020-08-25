@@ -3,6 +3,7 @@ package core
 import (
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+	"github.com/Z2Y/trpgo/city/asset"
 )
 
 type WorldMap struct {
@@ -13,8 +14,8 @@ type WorldMap struct {
 }
 
 var SampleWorldMap = WorldMap{
-	xLen: 100,
-	yLen: 100,
+	xLen: 300,
+	yLen: 300,
 	base: [][]int{},
 	buildings: [][]int{
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -26,17 +27,29 @@ var SampleWorldMap = WorldMap{
 	},
 }
 
-var Entitys = map[int]*common.RenderComponent{}
+var (
+	Entitys = map[int]*common.RenderComponent{}
+	Lands   = []int{}
+	Trees   = []int{101, 102, 103, 104, 105}
+)
 
 func RegistRenderComponent(code int, d *common.RenderComponent) {
 	Entitys[code] = d
 }
 
 func InitRenderComponents() {
-	// land1, _ := common.LoadedSprite("land/land_1.png")
 	land := common.NewSpritesheetFromFile("land.png", 64, 64)
 	landScale := engo.Point{X: 1, Y: 1}
 	for i, cell := range land.Cells() {
 		RegistRenderComponent(i, &common.RenderComponent{Scale: landScale, Drawable: cell})
+		Lands = append(Lands, i)
 	}
+
+	treeScale := engo.Point{X: 0.5, Y: 0.5}
+	RegistRenderComponent(101, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_004.png")})
+	RegistRenderComponent(102, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_005.png")})
+	RegistRenderComponent(103, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_006.png")})
+	RegistRenderComponent(104, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_007.png")})
+	RegistRenderComponent(105, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_008.png")})
+	RegistRenderComponent(106, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_012.png")})
 }

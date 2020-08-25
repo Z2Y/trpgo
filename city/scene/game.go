@@ -30,6 +30,7 @@ func NewGame() *Game {
 func (g *Game) Preload() {
 	asset.LoadAsset("npc/idle.png")
 	asset.LoadAsset("npc/walking.png")
+	asset.LoadAsset("land/foliagePack_default.xml")
 	asset.LoadAsset("land.png")
 	human.Init()
 	core.InitRenderComponents()
@@ -46,7 +47,7 @@ func (g *Game) Setup(u engo.Updater) {
 	hero := human.NewHuman(g.world.Center())
 
 	w.AddSystem(&common.RenderSystem{})
-	w.AddSystem(&common.FPSSystem{Display: false})
+	w.AddSystem(&common.FPSSystem{Display: true})
 	w.AddSystem(&common.AnimationSystem{})
 	w.AddSystem(g.world)
 	w.AddSystem(&core.ControlSystem{ZoomSpeed: -0.125})

@@ -42,8 +42,31 @@ func (w *WorldSystem) LoadWorldMap(worldMap *WorldMap) {
 				Width:    gridSize,
 				Height:   gridSize,
 			}
-			code := rand.Intn(len(Entitys))
+			code := rand.Intn(len(Lands))
 			w.grids = append(w.grids, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[code], SpaceComponent: space})
+		}
+	}
+
+	w.generateTrees(worldMap.xLen, worldMap.yLen)
+}
+
+func (w *WorldSystem) generateTrees(width, height int) {
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+			code := rand.Intn(40)
+			if code < len(Trees) {
+				space := &common.SpaceComponent{
+					Position: engo.Point{X: float32(x*(gridSize/2) + y*gridSize/2), Y: float32(y*gridSize/4 - x*gridSize/4)},
+					Width:    gridSize,
+					Height:   gridSize,
+				}
+				render := &common.RenderComponent{
+					Drawable:    Entitys[Trees[code]].Drawable,
+					Scale:       Entitys[Trees[code]].Scale,
+					StartZIndex: 2,
+				}
+				w.grids = append(w.grids, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space})
+			}
 		}
 	}
 }
