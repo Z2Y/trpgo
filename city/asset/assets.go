@@ -20,3 +20,7 @@ func LoadedSprite(url string) *common.Texture {
 
 	return sprite
 }
+
+func LoadedSubSprite(url string) *common.Texture {
+	return LoadedSprite(url)
+}

@@ -31,8 +31,6 @@ func (g *Game) Preload() {
 	asset.LoadAsset("npc/idle.png")
 	asset.LoadAsset("npc/walking.png")
 	asset.LoadAsset("land.png")
-	asset.LoadAsset("ui/blueSheet.xml")
-	asset.LoadAsset("font/CN.ttf")
 	human.Init()
 	core.InitRenderComponents()
 }

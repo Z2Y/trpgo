@@ -20,6 +20,7 @@ import (
 	"strings"
 
 	"github.com/EngoEngine/engo"
+	"github.com/EngoEngine/engo/common"
 )
 
 func mainBundlePath() string {
@@ -66,4 +67,18 @@ func LoadAsset(urls ...string) error {
 		}
 	}
 	return nil
+}
+
+func LoadedSprite(url string) *common.Texture {
+	sprite, err := common.LoadedSprite(url)
+
+	if err != nil {
+		panic(err)
+	}
+
+	return sprite
+}
+
+func LoadedSubSprite(url string) *common.Texture {
+	return LoadedSprite(subtextureURL(url))
 }
