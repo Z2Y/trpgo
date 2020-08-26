@@ -5,6 +5,7 @@ go 1.14
 require (
 	github.com/EngoEngine/ecs v1.0.4
 	github.com/EngoEngine/engo v1.0.5
+	golang.org/x/mobile v0.0.0-20200329125638-4c31acba0007
 	golang.org/x/net v0.0.0-20200625001655-4c5254603344 // indirect
 )
 

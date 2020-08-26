@@ -3,6 +3,7 @@ package com.zzy.trpgo;
 import android.opengl.GLSurfaceView;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import go.Seq;
 import android.util.Log;
 
 public class MainActivity extends AppCompatActivity {
@@ -10,6 +11,7 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        Seq.setContext(this.getApplicationContext());
         setContentView(R.layout.activity_main);
     }
 

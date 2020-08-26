@@ -1,5 +1,4 @@
-// +build darwin
-// +build ios
+// +build ios OR android
 
 package asset
 

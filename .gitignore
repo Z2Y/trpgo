@@ -1,4 +1,5 @@
 IOS/assets/
+Android/app/src/main/assets/
 Android/.gradle/
 Android/bridge/
 Bridge.framework
