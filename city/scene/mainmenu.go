@@ -34,7 +34,7 @@ func (s *MainMenu) Setup(u engo.Updater) {
 	text := ui.NewText(ui.Text{Value: "开始游戏"})
 	button := ui.NewButton(ui.Button{Text: text, Image: buttonBg, Width: 150, Height: 50})
 
-	button.SetPosition(layout.AlignCenter(engo.AABB{Max: engo.Point{X: engo.WindowWidth(), Y: engo.WindowHeight()}}, button.SpaceComponent.AABB()))
+	button.SetPosition(layout.AlignToWorldCenter(button.SpaceComponent.AABB()))
 
 	button.OnClick(func() {
 		engo.SetScene(&Game{}, true)
