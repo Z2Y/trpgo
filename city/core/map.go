@@ -14,8 +14,8 @@ type WorldMap struct {
 }
 
 var SampleWorldMap = WorldMap{
-	xLen: 300,
-	yLen: 300,
+	xLen: 100,
+	yLen: 100,
 	base: [][]int{},
 	buildings: [][]int{
 		{0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -29,7 +29,9 @@ var SampleWorldMap = WorldMap{
 
 var (
 	Entitys = map[int]*common.RenderComponent{}
-	Lands   = []int{}
+	Lands   = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+	Waters  = []int{13}
+	Sand    = []int{12}
 	Trees   = []int{101, 102, 103, 104, 105}
 )
 
@@ -42,7 +44,6 @@ func InitRenderComponents() {
 	landScale := engo.Point{X: 1, Y: 1}
 	for i, cell := range land.Cells() {
 		RegistRenderComponent(i, &common.RenderComponent{Scale: landScale, Drawable: cell})
-		Lands = append(Lands, i)
 	}
 
 	treeScale := engo.Point{X: 0.5, Y: 0.5}
