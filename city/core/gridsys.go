@@ -12,21 +12,33 @@ import (
 )
 
 type WorldSystem struct {
-	world    *ecs.World
-	renderer *common.RenderSystem
-	grids    []*Grid
+	world         *ecs.World
+	renderer      *common.RenderSystem
+	camera        *common.CameraSystem
+	cullingShader common.CullingShader
+	ground        map[int]map[int]*Grid // 地面
 
 	width  float32
 	height float32
+
+	cameraX int
+	cameraY int
+	cameraZ int
+
+	viewLenX int
+	viewLenY int
 }
 
 func (w *WorldSystem) New(world *ecs.World) {
 	w.world = world
+	w.cullingShader = common.DefaultShader
 
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {
 		case *common.RenderSystem:
 			w.renderer = sys
+		case *common.CameraSystem:
+			w.camera = sys
 		}
 	}
 }
@@ -42,6 +54,7 @@ func (w *WorldSystem) LoadWorldMap(worldMap *WorldMap) {
 	endAt := time.Now()
 	log.Println("Map Gen End", endAt.Sub(start))
 
+	w.ground = make(map[int]map[int]*Grid)
 	for x := 0; x < worldMap.xLen; x++ {
 		for y := 0; y < worldMap.yLen; y++ {
 			space := &common.SpaceComponent{
@@ -55,7 +68,10 @@ func (w *WorldSystem) LoadWorldMap(worldMap *WorldMap) {
 			} else if height_map.Value(x, y) >= 1 && height_map.Value(x, y) <= 2 {
 				code = Sand[0]
 			}
-			w.grids = append(w.grids, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[code], SpaceComponent: space})
+			if w.ground[x] == nil {
+				w.ground[x] = make(map[int]*Grid)
+			}
+			w.ground[x][y] = &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[code], SpaceComponent: space}
 		}
 	}
 
@@ -66,7 +82,7 @@ func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, h
 	for x := 0; x < width; x++ {
 		for y := 0; y < height; y++ {
 			if height_map.Value(x, y) >= 30 && height_map.Value(x, y) <= 64 {
-				code := rand.Intn(10)
+				code := rand.Intn(40)
 				if code < len(Trees) {
 					space := &common.SpaceComponent{
 						Position: engo.Point{X: float32(x*(gridSize/2) + y*gridSize/2), Y: float32(y*gridSize/4 - x*gridSize/4)},
@@ -78,7 +94,10 @@ func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, h
 						Scale:       Entitys[Trees[code]].Scale,
 						StartZIndex: 2,
 					}
-					w.grids = append(w.grids, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space})
+					ground := w.ground[x][y]
+					if ground != nil {
+						ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space})
+					}
 				}
 			}
 		}
@@ -100,14 +119,69 @@ func (w *WorldSystem) Bounds() engo.AABB {
 	}
 }
 
+func (w *WorldSystem) getGridPos(x, y, z float32) (int, int, int) {
+	py := int((x + 2*y) / engo.GetGlobalScale().X / gridSize)
+	px := int((x - 2*y) / engo.GetGlobalScale().Y / gridSize)
+	pz := int(z + 0.5)
+	return px, py, pz
+}
+
+func (w *WorldSystem) inView(x, y int) bool {
+	return (x >= w.cameraX-w.viewLenX && x < w.cameraX+w.viewLenX) &&
+		(y >= w.cameraY-w.viewLenY && y < w.cameraY+w.viewLenY)
+}
+
+func (w *WorldSystem) cameraMoved() bool {
+	x, y, z := w.getGridPos(w.camera.X(), w.camera.Y(), w.camera.Z())
+	if x != w.cameraX || y != w.cameraY || z != w.cameraZ {
+		return true
+	}
+	return false
+}
+
 func (w *WorldSystem) Contains(point engo.Point) bool {
 	bounds := w.Bounds()
 	return point.X > bounds.Min.X && point.X < bounds.Max.X && point.Y > bounds.Min.Y && point.Y < bounds.Max.Y
 }
 
 func (w *WorldSystem) Update(float32) {
-	for _, grid := range w.grids {
-		w.renderer.Add(&grid.BasicEntity, grid.RenderComponent, grid.SpaceComponent)
+	lastCameraX, lastCameraY := w.cameraX, w.cameraY
+	if w.cameraMoved() {
+		w.cameraX, w.cameraY, w.cameraZ = w.getGridPos(w.camera.X(), w.camera.Y(), w.camera.Z())
+		w.viewLenX = int(engo.GameWidth()/engo.GetGlobalScale().X/gridSize) * (1 + w.cameraZ)
+		w.viewLenY = int(engo.GameWidth()/engo.GetGlobalScale().Y/gridSize) * (1 + w.cameraZ)
+
+		count := 0
+
+		for i := lastCameraX - w.viewLenX; i < lastCameraX+w.viewLenX; i++ {
+			for j := lastCameraY - w.viewLenY; j < lastCameraY+w.viewLenY; j++ {
+				grid := w.ground[i][j]
+				if grid != nil && !w.inView(i, j) {
+					w.renderer.Remove(grid.BasicEntity)
+					if grid.SubEntites != nil {
+						for _, e := range grid.SubEntites {
+							w.renderer.Remove(e.BasicEntity)
+						}
+					}
+				}
+			}
+		}
+
+		for i := w.cameraX - w.viewLenX; i < w.cameraX+w.viewLenY; i++ {
+			for j := w.cameraY - w.viewLenY; j < w.cameraY+w.viewLenY; j++ {
+				grid := w.ground[i][j]
+				if grid != nil {
+					count += 1
+					w.renderer.Add(&grid.BasicEntity, grid.RenderComponent, grid.SpaceComponent)
+					if grid.SubEntites != nil {
+						for _, e := range grid.SubEntites {
+							count += 1
+							w.renderer.Add(&e.BasicEntity, e.RenderComponent, e.SpaceComponent)
+						}
+					}
+				}
+			}
+		}
 	}
 }
 

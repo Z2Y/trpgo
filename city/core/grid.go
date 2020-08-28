@@ -11,4 +11,6 @@ type Grid struct {
 	ecs.BasicEntity
 	*common.RenderComponent
 	*common.SpaceComponent
+
+	SubEntites []*Grid
 }

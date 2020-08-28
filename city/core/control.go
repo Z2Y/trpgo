@@ -4,6 +4,7 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+	"github.com/Z2Y/trpgo/city/core/input"
 )
 
 type ControlSystem struct {
@@ -47,7 +48,7 @@ func NextStep(i float32) float32 {
 
 func (c *ControlSystem) setWorldCamera() {
 	worldWidth, worldHeight := c.grid.Size()
-	centerX := -float32(-worldWidth) / 2
+	centerX := float32(worldWidth) / 2
 	centerY := float32(0)
 
 	common.CameraBounds.Min.X = centerX - worldWidth
@@ -116,4 +117,14 @@ func (c *ControlSystem) New(w *ecs.World) {
 	if c.grid != nil && c.camera != nil {
 		c.setWorldCamera()
 	}
+	c.listenTouchEvent()
+}
+
+func (s *ControlSystem) listenTouchEvent() {
+	engo.Mailbox.Listen(input.TOUCH_MESSAGE, func(message engo.Message) {
+		_, isTouch := message.(input.TouchMessage)
+		if isTouch {
+			s.Update(engo.Time.Delta())
+		}
+	})
 }

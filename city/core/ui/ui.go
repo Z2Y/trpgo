@@ -4,6 +4,7 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+	"github.com/Z2Y/trpgo/city/core/input"
 )
 
 var (
@@ -40,6 +41,7 @@ func (ui *UISystem) New(world *ecs.World) {
 			ui.renderer = sys
 		}
 	}
+	ui.listenTouchEvent()
 }
 
 func (ui *UISystem) Add(entity *UIBasic) {
@@ -76,4 +78,13 @@ func (ui *UISystem) Update(dt float32) {
 			}
 		}
 	}
+}
+
+func (ui *UISystem) listenTouchEvent() {
+	engo.Mailbox.Listen(input.TOUCH_MESSAGE, func(message engo.Message) {
+		_, isTouch := message.(input.TouchMessage)
+		if isTouch {
+			ui.Update(engo.Time.Delta())
+		}
+	})
 }

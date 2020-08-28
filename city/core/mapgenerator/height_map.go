@@ -10,8 +10,8 @@ var (
 		drops:        60,
 		passes:       4,
 		stability:    3,
-		particlesMin: 200,
-		particlesMax: 300,
+		particlesMin: 400,
+		particlesMax: 800,
 	}
 )
 
@@ -84,7 +84,7 @@ func (m *HeightMap) checkFinalPos(pos_x, pos_y int) int {
 	for i := pos_x - stability; i < pos_x+stability; i++ {
 		for j := pos_y - stability; j < pos_y+stability; j++ {
 			neighbor_pos := i + j*m.Width
-			if neighbor_pos < m.Width*m.Height && m.data[neighbor_pos] < m.data[pos] {
+			if neighbor_pos >= 0 && neighbor_pos < m.Width*m.Height && m.data[neighbor_pos] < m.data[pos] {
 				neighbors = append(neighbors, neighbor_pos)
 			}
 		}

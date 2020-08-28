@@ -5,6 +5,7 @@ package bridge
 import (
 	"github.com/EngoEngine/engo"
 	"github.com/Z2Y/trpgo/city"
+	"github.com/Z2Y/trpgo/city/core/input"
 )
 
 var running bool
@@ -23,7 +24,7 @@ func IsRunning() bool {
 }
 
 func Touch(x, y, id, action int) {
-	engo.TouchEvent(x, y, id, action)
+	input.TouchEvent(x, y, id, action)
 }
 
 func Resume() {
