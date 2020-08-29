@@ -12,11 +12,11 @@ import (
 )
 
 type WorldSystem struct {
-	world         *ecs.World
-	renderer      *common.RenderSystem
-	camera        *common.CameraSystem
-	cullingShader common.CullingShader
-	ground        map[int]map[int]*Grid // 地面
+	world    *ecs.World
+	renderer *common.RenderSystem
+	camera   *common.CameraSystem
+
+	ground map[int]map[int]*Grid // 地面
 
 	width  float32
 	height float32
@@ -31,7 +31,6 @@ type WorldSystem struct {
 
 func (w *WorldSystem) New(world *ecs.World) {
 	w.world = world
-	w.cullingShader = common.DefaultShader
 
 	for _, system := range world.Systems() {
 		switch sys := system.(type) {

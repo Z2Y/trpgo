@@ -10,7 +10,8 @@ import (
 type ControlSystem struct {
 	grid *WorldSystem
 
-	camera *common.CameraSystem
+	camera       *common.CameraSystem
+	touchHandler *input.TouchHandler
 
 	state     ControlState
 	ZoomSpeed float32
@@ -70,6 +71,16 @@ func (c *ControlSystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (c *ControlSystem) Update(float32) {
+	for {
+		ok := c.touchHandler.Update()
+		c.update()
+		if !ok {
+			break
+		}
+	}
+}
+
+func (c *ControlSystem) update() {
 	var (
 		mouseX = engo.Input.Mouse.X // *c.camera.Z() + (c.camera.X()-(engo.GameWidth()/2)*c.camera.Z()+(engo.ResizeXOffset/2))/engo.GetGlobalScale().X
 		mouseY = engo.Input.Mouse.Y // *c.camera.Z() + (c.camera.Y()-(engo.GameHeight()/2)*c.camera.Z()+(engo.ResizeYOffset/2))/engo.GetGlobalScale().Y
@@ -117,14 +128,5 @@ func (c *ControlSystem) New(w *ecs.World) {
 	if c.grid != nil && c.camera != nil {
 		c.setWorldCamera()
 	}
-	c.listenTouchEvent()
-}
-
-func (s *ControlSystem) listenTouchEvent() {
-	engo.Mailbox.Listen(input.TOUCH_MESSAGE, func(message engo.Message) {
-		_, isTouch := message.(input.TouchMessage)
-		if isTouch {
-			s.Update(engo.Time.Delta())
-		}
-	})
+	c.touchHandler = input.NewTouchHandler()
 }

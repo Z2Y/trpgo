@@ -2,10 +2,16 @@
 
 package input
 
-import "github.com/EngoEngine/engo"
+import (
+	"github.com/EngoEngine/engo"
+)
 
 func TouchEvent(x, y, id, action int) {
+	go func() {
+		engo.Mailbox.Dispatch(TouchMessage{X: x, Y: y, ID: id, Action: action})
+	}()
+}
+
+func UpdateMouse(x, y, id, action int) {
 	engo.TouchEvent(x, y, id, action)
-	engo.Mailbox.Dispatch(TouchMessage{X: float32(x), Y: float32(y), ID: id, Action: engo.Input.Mouse.Action})
-	engo.Input.Mouse.Action = engo.Neutral
 }

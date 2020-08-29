@@ -29,7 +29,8 @@ type UIFace interface {
 }
 
 type UISystem struct {
-	entities []*UIBasic
+	entities     []*UIBasic
+	touchHandler *input.TouchHandler
 
 	renderer *common.RenderSystem
 }
@@ -41,7 +42,7 @@ func (ui *UISystem) New(world *ecs.World) {
 			ui.renderer = sys
 		}
 	}
-	ui.listenTouchEvent()
+	ui.touchHandler = input.NewTouchHandler()
 }
 
 func (ui *UISystem) Add(entity *UIBasic) {
@@ -70,6 +71,16 @@ func (ui *UISystem) Remove(basic ecs.BasicEntity) {
 }
 
 func (ui *UISystem) Update(dt float32) {
+	for {
+		ok := ui.touchHandler.Update()
+		ui.update()
+		if !ok {
+			break
+		}
+	}
+}
+
+func (ui *UISystem) update() {
 	curPos := engo.Point{X: engo.Input.Mouse.X, Y: engo.Input.Mouse.Y}
 	for _, e := range ui.entities {
 		if e.Contains(curPos) && e.MessageListener != nil {
@@ -78,13 +89,4 @@ func (ui *UISystem) Update(dt float32) {
 			}
 		}
 	}
-}
-
-func (ui *UISystem) listenTouchEvent() {
-	engo.Mailbox.Listen(input.TOUCH_MESSAGE, func(message engo.Message) {
-		_, isTouch := message.(input.TouchMessage)
-		if isTouch {
-			ui.Update(engo.Time.Delta())
-		}
-	})
 }
