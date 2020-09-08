@@ -52,11 +52,11 @@ func (c *ControlSystem) setWorldCamera() {
 	centerX := float32(worldWidth) / 2
 	centerY := float32(0)
 
-	common.CameraBounds.Min.X = centerX - worldWidth
-	common.CameraBounds.Min.Y = centerY - worldHeight
+	common.CameraBounds.Min.X = centerX - worldWidth/2 + engo.GameWidth()/engo.GetGlobalScale().X
+	common.CameraBounds.Min.Y = centerY - worldHeight/2 + engo.GameHeight()/engo.GetGlobalScale().Y
 
-	common.CameraBounds.Max.X = centerX + worldWidth
-	common.CameraBounds.Max.Y = centerY + worldWidth
+	common.CameraBounds.Max.X = centerX + worldWidth/2 - engo.GameWidth()/engo.GetGlobalScale().X
+	common.CameraBounds.Max.Y = centerY + worldHeight/2 - engo.GameHeight()/engo.GetGlobalScale().Y
 
 	engo.Mailbox.Dispatch(common.CameraMessage{Axis: common.XAxis,
 		Value:       centerX,

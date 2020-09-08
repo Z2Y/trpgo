@@ -145,15 +145,16 @@ func (w *WorldSystem) Contains(point engo.Point) bool {
 
 func (w *WorldSystem) Update(float32) {
 	lastCameraX, lastCameraY := w.cameraX, w.cameraY
+	lastViewLenX, lastViewLenY := w.viewLenX, w.viewLenY
 	if w.cameraMoved() {
 		w.cameraX, w.cameraY, w.cameraZ = w.getGridPos(w.camera.X(), w.camera.Y(), w.camera.Z())
-		w.viewLenX = int(engo.GameWidth()/engo.GetGlobalScale().X/gridSize) * (1 + w.cameraZ)
-		w.viewLenY = int(engo.GameWidth()/engo.GetGlobalScale().Y/gridSize) * (1 + w.cameraZ)
+		w.viewLenX = int(engo.GameWidth()/engo.GetGlobalScale().X/gridSize) * (w.cameraZ + 1)
+		w.viewLenY = int(engo.GameWidth()/engo.GetGlobalScale().Y/gridSize) * (w.cameraZ + 1)
 
 		count := 0
 
-		for i := lastCameraX - w.viewLenX; i < lastCameraX+w.viewLenX; i++ {
-			for j := lastCameraY - w.viewLenY; j < lastCameraY+w.viewLenY; j++ {
+		for i := lastCameraX - lastViewLenX; i < lastCameraX+lastViewLenX; i++ {
+			for j := lastCameraY - lastViewLenY; j < lastCameraY+lastViewLenY; j++ {
 				grid := w.ground[i][j]
 				if grid != nil && !w.inView(i, j) {
 					w.renderer.Remove(grid.BasicEntity)
@@ -166,7 +167,7 @@ func (w *WorldSystem) Update(float32) {
 			}
 		}
 
-		for i := w.cameraX - w.viewLenX; i < w.cameraX+w.viewLenY; i++ {
+		for i := w.cameraX - w.viewLenX; i < w.cameraX+w.viewLenX; i++ {
 			for j := w.cameraY - w.viewLenY; j < w.cameraY+w.viewLenY; j++ {
 				grid := w.ground[i][j]
 				if grid != nil {
@@ -178,6 +179,18 @@ func (w *WorldSystem) Update(float32) {
 							w.renderer.Add(&e.BasicEntity, e.RenderComponent, e.SpaceComponent)
 						}
 					}
+				} else {
+					space := &common.SpaceComponent{
+						Position: engo.Point{X: float32(i*(gridSize/2) + j*gridSize/2), Y: float32(j*gridSize/4 - i*gridSize/4)},
+						Width:    gridSize,
+						Height:   gridSize,
+					}
+					fillGrid := &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[Waters[0]], SpaceComponent: space}
+					if w.ground[i] == nil {
+						w.ground[i] = make(map[int]*Grid)
+					}
+					w.ground[i][j] = fillGrid
+					w.renderer.Add(&fillGrid.BasicEntity, fillGrid.RenderComponent, fillGrid.SpaceComponent)
 				}
 			}
 		}

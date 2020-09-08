@@ -12,6 +12,9 @@ github.com/Noofbiz/sdlMojaveFix v0.0.1 h1:Vz4HSG7QQ5gkOWeZsSUFCGJAvMoRUHloTwF80l
 github.com/Noofbiz/sdlMojaveFix v0.0.1/go.mod h1:ZvRLF4Dk75OnTtHfCMClqgwrX0u531XWaai0lNGzKWE=
 github.com/Noofbiz/tmx v0.2.0 h1:5bVZn4FN+8HVhvl2XmAiI9RFlo9/6xauhco1KGcJ+38=
 github.com/Noofbiz/tmx v0.2.0/go.mod h1:gL6mQUTp1Vi9pq/gmCgyotzJ35lOQF2C2NKJrQtltAE=
+github.com/Z2Y/glfw v0.0.0-20200908101240-0750ed6d97b3 h1:UwKJQiKQv+DNDxt2Y9u3O4fLpBL3vyTUZaxlJgF6fnA=
+github.com/Z2Y/glfw/v3.3/glfw v0.0.0-20200908101240-0750ed6d97b3 h1:hZXkhFLdze3uR1zAI4lSS6s0LkeRI3+PnzdFUIGskDI=
+github.com/Z2Y/glfw/v3.3/glfw v0.0.0-20200908101240-0750ed6d97b3/go.mod h1:5h5yzEf65oBQGesuW9+h8MhSFTTz5mwTQHmHNRdpRIM=
 github.com/creack/pty v1.1.9/go.mod h1:oKZEueFk5CKHvIhNR5MUki03XCEU+Q6VDXinZuGJ33E=
 github.com/davecgh/go-spew v1.1.0 h1:ZDRjVQ15GmhC3fiQ8ni8+OwkZQO4DARzQgrnXU1Liz8=
 github.com/davecgh/go-spew v1.1.0/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=

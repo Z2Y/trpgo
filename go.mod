@@ -10,3 +10,4 @@ require (
 )
 
 // replace github.com/EngoEngine/engo => /Users/zhuzhiying/BczProject/go-game/engo // indirect
+replace github.com/go-gl/glfw/v3.3/glfw => github.com/Z2Y/glfw/v3.3/glfw v0.0.0-20200908101240-0750ed6d97b3 // indirect

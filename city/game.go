@@ -22,13 +22,14 @@ func getSafeScale(width, height float32) float32 {
 func Start(width, height int) {
 	gameScale := getSafeScale(float32(width), float32(height))
 	opts := engo.RunOptions{
-		Title:        "trpgo",
-		Width:        width,
-		Height:       height,
-		MobileWidth:  width,
-		MobileHeight: height,
-		FPSLimit:     120,
-		GlobalScale:  engo.Point{X: gameScale, Y: gameScale},
+		Title:         "trpgo",
+		Width:         width,
+		Height:        height,
+		MobileWidth:   width,
+		MobileHeight:  height,
+		FPSLimit:      120,
+		ScaleOnResize: true,
+		GlobalScale:   engo.Point{X: gameScale, Y: gameScale},
 	}
 
 	engo.Run(opts, &scene.MainMenu{})
