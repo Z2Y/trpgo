@@ -1,4 +1,4 @@
-package action
+package control
 
 import (
 	"math/rand"
@@ -20,6 +20,7 @@ type ActionEntity struct {
 	common.SpaceComponent
 	WalkComponent
 
+	Offset engo.Point
 	ActionState
 }
 
@@ -110,6 +111,10 @@ func (s *ActionState) Update(dt float32) {
 	if s.elapsed >= s.duration {
 		s.Next()
 	}
+}
+
+func (s *ActionState) Finished() bool {
+	return s.elapsed >= s.duration
 }
 
 func (s *ActionState) Next() {

@@ -1,4 +1,4 @@
-package action
+package control
 
 import (
 	"github.com/EngoEngine/ecs"
@@ -78,8 +78,7 @@ func (s *WalkSystem) Remove(basic ecs.BasicEntity) {
 
 func (s *WalkSystem) Update(dt float32) {
 	for _, e := range s.entities {
-		speed := engo.GameWidth() * dt
-		nextPosition := engo.Point{X: e.SpaceComponent.Position.X + speed*e.WalkComponent.Point.X, Y: e.SpaceComponent.Position.Y + speed*e.WalkComponent.Point.Y}
+		nextPosition := engo.Point{X: e.SpaceComponent.Position.X + e.WalkComponent.Point.X, Y: e.SpaceComponent.Position.Y + e.WalkComponent.Point.Y}
 
 		if nextPosition.Within(s.land) {
 			e.SpaceComponent.Position = nextPosition

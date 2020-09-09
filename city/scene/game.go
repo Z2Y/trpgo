@@ -9,7 +9,7 @@ import (
 
 	"github.com/Z2Y/trpgo/city/asset"
 	"github.com/Z2Y/trpgo/city/core"
-	"github.com/Z2Y/trpgo/city/core/action"
+	"github.com/Z2Y/trpgo/city/core/control"
 	"github.com/Z2Y/trpgo/city/core/ui"
 	"github.com/Z2Y/trpgo/city/human"
 )
@@ -31,6 +31,7 @@ func (g *Game) Preload() {
 	asset.LoadAsset("npc/idle.png")
 	asset.LoadAsset("npc/walking.png")
 	asset.LoadAsset("land/foliagePack_default.xml")
+	asset.LoadAsset("building/building.xml")
 	asset.LoadAsset("land.png")
 	human.Init()
 	core.InitRenderComponents()
@@ -50,8 +51,8 @@ func (g *Game) Setup(u engo.Updater) {
 	w.AddSystem(&common.FPSSystem{Display: true, Font: ui.DefaultFont})
 	w.AddSystem(&common.AnimationSystem{})
 	w.AddSystem(g.world)
-	w.AddSystem(&core.ControlSystem{ZoomSpeed: -0.125})
-	w.AddSystem(&action.AutoActionSystem{})
+	w.AddSystem(&control.ControlSystem{ZoomSpeed: -0.125})
+	w.AddSystem(&control.AutoActionSystem{})
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -59,8 +60,10 @@ func (g *Game) Setup(u engo.Updater) {
 			sys.Add(&hero.BasicEntity, &hero.RenderComponent, &hero.SpaceComponent)
 		case *common.AnimationSystem:
 			sys.Add(&hero.BasicEntity, &hero.AnimationComponent, &hero.RenderComponent)
-		case *action.AutoActionSystem:
+		case *control.ControlSystem:
 			sys.Add(&hero.ActionEntity)
+		case *control.WalkSystem:
+			sys.Add(&hero.BasicEntity, &hero.WalkComponent, &hero.SpaceComponent)
 		}
 	}
 }

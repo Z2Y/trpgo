@@ -1,0 +1,16 @@
+
+<TextureAtlas imagePath="building.png" width="511" height="1200">
+    <SubTexture name="building_1.png" x="1" y="686" width="246" height="246"/>
+    <SubTexture name="building_2.png" x="1" y="1" width="348" height="416"/>
+    <SubTexture name="building_3.png" x="249" y="686" width="197" height="279"/>
+    <SubTexture name="building_4.png" x="1" y="419" width="275" height="265"/>
+    <SubTexture name="building_5.png" x="1" y="1102" width="148" height="97"/>
+    <SubTexture name="building_6.png" x="207" y="967" width="177" height="147"/>
+    <SubTexture name="building_7.png" x="386" y="967" width="124" height="133"/>
+    <SubTexture name="building_8.png" x="1" y="934" width="204" height="166"/>
+    <SubTexture name="building_9.png" x="278" y="419" width="232" height="254"/>
+    <SubTexture name="building_10.png" x="351" y="130" width="150" height="132"/>
+    <SubTexture name="building_11.png" x="351" y="1" width="158" height="127"/>
+    <SubTexture name="building_12.png" x="386" y="1102" width="97" height="91"/>
+    <SubTexture name="building_13.png" x="351" y="264" width="149" height="131"/>
+</TextureAtlas>

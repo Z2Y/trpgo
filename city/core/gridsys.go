@@ -75,6 +75,7 @@ func (w *WorldSystem) LoadWorldMap(worldMap *WorldMap) {
 	}
 
 	w.generateTrees(height_map, worldMap.xLen, worldMap.yLen)
+	w.generateBuildings(height_map, worldMap.xLen, worldMap.yLen)
 }
 
 func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, height int) {
@@ -97,6 +98,30 @@ func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, h
 					if ground != nil {
 						ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space})
 					}
+				}
+			}
+		}
+	}
+}
+
+func (w *WorldSystem) generateBuildings(height_map *mapgenerator.HeightMap, width, height int) {
+	for x := 0; x < width; x++ {
+		for y := 0; y < height; y++ {
+			code := rand.Intn(1000)
+			if code < len(Buildings) && (height_map.Value(x, y) >= 10 && height_map.Value(x, y) < 30) {
+				space := &common.SpaceComponent{
+					Position: engo.Point{X: float32(x*(gridSize/2) + y*gridSize/2), Y: float32(y*gridSize/4 - x*gridSize/4)},
+					Width:    gridSize,
+					Height:   gridSize,
+				}
+				render := &common.RenderComponent{
+					Drawable:    Entitys[Buildings[code]].Drawable,
+					Scale:       Entitys[Buildings[code]].Scale,
+					StartZIndex: 2,
+				}
+				ground := w.ground[x][y]
+				if ground != nil {
+					ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space})
 				}
 			}
 		}

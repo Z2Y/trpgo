@@ -28,11 +28,12 @@ var SampleWorldMap = WorldMap{
 }
 
 var (
-	Entitys = map[int]*common.RenderComponent{}
-	Lands   = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
-	Waters  = []int{13}
-	Sand    = []int{12}
-	Trees   = []int{101, 102, 103, 104, 105}
+	Entitys   = map[int]*common.RenderComponent{}
+	Lands     = []int{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11}
+	Waters    = []int{13}
+	Sand      = []int{12}
+	Trees     = []int{101, 102, 103, 104, 105}
+	Buildings = []int{201, 202, 203, 204, 205}
 )
 
 func RegistRenderComponent(code int, d *common.RenderComponent) {
@@ -53,4 +54,13 @@ func InitRenderComponents() {
 	RegistRenderComponent(104, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_007.png")})
 	RegistRenderComponent(105, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_008.png")})
 	RegistRenderComponent(106, &common.RenderComponent{Scale: treeScale, Drawable: asset.LoadedSubSprite("foliagePack_012.png")})
+
+	buildingScale := engo.Point{X: 0.5, Y: 0.5}
+	RegistRenderComponent(201, &common.RenderComponent{Scale: buildingScale, Drawable: asset.LoadedSubSprite("building_1.png")})
+	RegistRenderComponent(202, &common.RenderComponent{Scale: buildingScale, Drawable: asset.LoadedSubSprite("building_2.png")})
+	RegistRenderComponent(203, &common.RenderComponent{Scale: buildingScale, Drawable: asset.LoadedSubSprite("building_3.png")})
+	RegistRenderComponent(204, &common.RenderComponent{Scale: buildingScale, Drawable: asset.LoadedSubSprite("building_4.png")})
+	RegistRenderComponent(205, &common.RenderComponent{Scale: buildingScale, Drawable: asset.LoadedSubSprite("building_5.png")})
+	RegistRenderComponent(206, &common.RenderComponent{Scale: buildingScale, Drawable: asset.LoadedSubSprite("building_6.png")})
+
 }

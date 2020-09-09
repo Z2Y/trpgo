@@ -79,7 +79,7 @@ func SetDefaultFont(URL string) {
 	fnt := &common.Font{
 		URL:  URL,
 		FG:   color.White,
-		Size: 32,
+		Size: 24,
 	}
 	err := fnt.CreatePreloaded()
 

@@ -6,7 +6,7 @@ import (
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
 
-	"github.com/Z2Y/trpgo/city/core/action"
+	"github.com/Z2Y/trpgo/city/core/control"
 )
 
 var (
@@ -16,11 +16,11 @@ var (
 )
 
 type Human struct {
-	action.ActionEntity
+	control.ActionEntity
 	common.AnimationComponent
 	common.RenderComponent
 
-	Offset engo.Point
+	CurrentAnimation *common.AnimationComponent
 }
 
 func frames(size int) []int {
@@ -47,7 +47,7 @@ func Init() {
 }
 
 func NewHuman(point engo.Point) *Human {
-	entity := &Human{ActionEntity: action.NewActionEntity()}
+	entity := &Human{ActionEntity: control.NewActionEntity()}
 
 	entity.RenderComponent = common.RenderComponent{
 		Drawable:    DefaultAnimation.Drawables[0],
@@ -62,6 +62,7 @@ func NewHuman(point engo.Point) *Human {
 	}
 
 	entity.AnimationComponent = *DefaultAnimation
+	entity.SetAnimation(DefaultAnimation)
 
 	entity.listenAction()
 
@@ -82,20 +83,30 @@ func getCenterOfRender(render common.RenderComponent) engo.Point {
 
 func (h *Human) listenAction() {
 	engo.Mailbox.Listen("ActionMessage", func(message engo.Message) {
-		msg, isAction := message.(action.ActionMessage)
+		msg, isAction := message.(control.ActionMessage)
 		if isAction && h.ID() == msg.BasicEntity.ID() {
 			switch msg.State.Code {
-			case action.ActionIdle:
-				h.AnimationComponent = *DefaultAnimation
-			case action.ActionWalking:
+			case control.ActionIdle:
+				h.SetAnimation(DefaultAnimation)
+			case control.ActionWalking:
 				h.UpdateFace()
-				h.AnimationComponent = *Animations["walking"]
+				h.SetAnimation(Animations["walking"])
 			}
 		}
 	})
 }
 
+func (h *Human) SetAnimation(animation *common.AnimationComponent) {
+	if h.CurrentAnimation != animation {
+		h.AnimationComponent = *animation
+		h.CurrentAnimation = animation
+	}
+}
+
 func (h *Human) UpdateFace() {
+	if h.ActionState.Speed.X == 0 {
+		return
+	}
 	if h.ActionState.Speed.X < 0 {
 		h.RenderComponent.Scale.X = -0.5
 	} else {
