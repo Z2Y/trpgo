@@ -74,8 +74,8 @@ func (w *WorldSystem) LoadWorldMap(worldMap *WorldMap) {
 		}
 	}
 
-	w.generateTrees(height_map, worldMap.xLen, worldMap.yLen)
 	w.generateBuildings(height_map, worldMap.xLen, worldMap.yLen)
+	w.generateTrees(height_map, worldMap.xLen, worldMap.yLen)
 }
 
 func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, height int) {
@@ -85,9 +85,8 @@ func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, h
 				code := rand.Intn(40)
 				if code < len(Trees) {
 					space := &common.SpaceComponent{
-						Position: engo.Point{X: float32(x*(gridSize/2) + y*gridSize/2), Y: float32(y*gridSize/4 - x*gridSize/4)},
-						Width:    gridSize,
-						Height:   gridSize,
+						Width:  gridSize,
+						Height: gridSize,
 					}
 					render := &common.RenderComponent{
 						Drawable:    Entitys[Trees[code]].Drawable,
@@ -96,7 +95,7 @@ func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, h
 					}
 					ground := w.ground[x][y]
 					if ground != nil {
-						ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space, Code: Trees[code]})
+						ground.SubEntites = append(ground.SubEntites, AlignEntityToGrid(&Entity{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space, X: x, Y: y}))
 					}
 				}
 			}
@@ -110,9 +109,8 @@ func (w *WorldSystem) generateBuildings(height_map *mapgenerator.HeightMap, widt
 			code := rand.Intn(1000)
 			if code < len(Buildings) && (height_map.Value(x, y) >= 10 && height_map.Value(x, y) < 30) {
 				space := &common.SpaceComponent{
-					Position: engo.Point{X: float32(x*(gridSize/2) + y*gridSize/2), Y: float32(y*gridSize/4 - x*gridSize/4)},
-					Width:    gridSize,
-					Height:   gridSize,
+					Width:  gridSize,
+					Height: gridSize,
 				}
 				render := &common.RenderComponent{
 					Drawable:    Entitys[Buildings[code]].Drawable,
@@ -121,7 +119,7 @@ func (w *WorldSystem) generateBuildings(height_map *mapgenerator.HeightMap, widt
 				}
 				ground := w.ground[x][y]
 				if ground != nil {
-					ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space, Code: Buildings[code]})
+					ground.SubEntites = append(ground.SubEntites, AlignEntityToGrid(&Entity{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space, X: x, Y: y, Width: 1, Height: 1}))
 				}
 			}
 		}
@@ -217,7 +215,7 @@ func (w *WorldSystem) Update(float32) {
 						Width:    gridSize,
 						Height:   gridSize,
 					}
-					fillGrid := &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[Lands[0]], SpaceComponent: space, Code: Lands[0]}
+					fillGrid := &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[Waters[0]], SpaceComponent: space, Code: Waters[0]}
 					if w.ground[i] == nil {
 						w.ground[i] = make(map[int]*Grid)
 					}
