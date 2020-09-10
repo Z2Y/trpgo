@@ -71,7 +71,7 @@ func (s *AutoActionSystem) New(w *ecs.World) {
 
 func (s *AutoActionSystem) Add(entity *ActionEntity) {
 	s.entities = append(s.entities, entity)
-	s.walkSys.Add(&entity.BasicEntity, &entity.WalkComponent, &entity.SpaceComponent)
+	s.walkSys.Add(entity)
 }
 
 func (s *AutoActionSystem) Remove(basic ecs.BasicEntity) {

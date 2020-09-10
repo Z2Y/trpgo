@@ -70,7 +70,7 @@ func (w *WorldSystem) LoadWorldMap(worldMap *WorldMap) {
 			if w.ground[x] == nil {
 				w.ground[x] = make(map[int]*Grid)
 			}
-			w.ground[x][y] = &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[code], SpaceComponent: space}
+			w.ground[x][y] = &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[code], SpaceComponent: space, Code: code}
 		}
 	}
 
@@ -96,7 +96,7 @@ func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, h
 					}
 					ground := w.ground[x][y]
 					if ground != nil {
-						ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space})
+						ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space, Code: Trees[code]})
 					}
 				}
 			}
@@ -121,7 +121,7 @@ func (w *WorldSystem) generateBuildings(height_map *mapgenerator.HeightMap, widt
 				}
 				ground := w.ground[x][y]
 				if ground != nil {
-					ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space})
+					ground.SubEntites = append(ground.SubEntites, &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space, Code: Buildings[code]})
 				}
 			}
 		}
@@ -133,7 +133,7 @@ func (w *WorldSystem) Size() (float32, float32) {
 }
 
 func (w *WorldSystem) Center() engo.Point {
-	return engo.Point{X: w.width / 2, Y: 0}
+	return engo.Point{X: w.width / 2, Y: gridSize / 4}
 }
 
 func (w *WorldSystem) Bounds() engo.AABB {
@@ -144,8 +144,8 @@ func (w *WorldSystem) Bounds() engo.AABB {
 }
 
 func (w *WorldSystem) getGridPos(x, y, z float32) (int, int, int) {
-	py := int((x + 2*y) / engo.GetGlobalScale().X / gridSize)
-	px := int((x - 2*y) / engo.GetGlobalScale().Y / gridSize)
+	py := int((x + 2*y) / engo.GetGlobalScale().Y / gridSize)
+	px := int((x - 2*y) / engo.GetGlobalScale().X / gridSize)
 	pz := int(z + 0.5)
 	return px, py, pz
 }
@@ -166,6 +166,13 @@ func (w *WorldSystem) cameraMoved() bool {
 func (w *WorldSystem) Contains(point engo.Point) bool {
 	bounds := w.Bounds()
 	return point.X > bounds.Min.X && point.X < bounds.Max.X && point.Y > bounds.Min.Y && point.Y < bounds.Max.Y
+}
+
+func (w *WorldSystem) CanMove(x, y float32) bool {
+	py := int((x+2*y)/gridSize - 0.5)
+	px := int((x-2*y)/gridSize + 0.5)
+	grid := w.ground[px][py]
+	return (grid != nil && grid.Code != Waters[0])
 }
 
 func (w *WorldSystem) Update(float32) {
@@ -210,7 +217,7 @@ func (w *WorldSystem) Update(float32) {
 						Width:    gridSize,
 						Height:   gridSize,
 					}
-					fillGrid := &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[Waters[0]], SpaceComponent: space}
+					fillGrid := &Grid{BasicEntity: ecs.NewBasic(), RenderComponent: Entitys[Lands[0]], SpaceComponent: space, Code: Lands[0]}
 					if w.ground[i] == nil {
 						w.ground[i] = make(map[int]*Grid)
 					}

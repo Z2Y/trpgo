@@ -13,4 +13,6 @@ type Grid struct {
 	*common.SpaceComponent
 
 	SubEntites []*Grid
+
+	Code int
 }

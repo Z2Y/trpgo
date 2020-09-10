@@ -3,7 +3,6 @@ package control
 import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
-	"github.com/EngoEngine/engo/common"
 	"github.com/Z2Y/trpgo/city/core"
 )
 
@@ -13,15 +12,9 @@ type WalkComponent struct {
 	engo.Point
 }
 
-type walkEntity struct {
-	*ecs.BasicEntity
-	*WalkComponent
-	*common.SpaceComponent
-}
-
 type WalkSystem struct {
 	ids      map[uint64]struct{}
-	entities []walkEntity
+	entities []*ActionEntity
 	land     *core.WorldSystem
 }
 
@@ -55,12 +48,12 @@ func (s *WalkSystem) inBound() {
 
 }
 
-func (s *WalkSystem) Add(basic *ecs.BasicEntity, speed *WalkComponent, space *common.SpaceComponent) {
-	if _, ok := s.ids[basic.ID()]; ok {
+func (s *WalkSystem) Add(entity *ActionEntity) {
+	if _, ok := s.ids[entity.ID()]; ok {
 		return
 	}
-	s.ids[basic.ID()] = struct{}{}
-	s.entities = append(s.entities, walkEntity{basic, speed, space})
+	s.ids[entity.ID()] = struct{}{}
+	s.entities = append(s.entities, entity)
 }
 
 func (s *WalkSystem) Remove(basic ecs.BasicEntity) {
@@ -80,7 +73,7 @@ func (s *WalkSystem) Update(dt float32) {
 	for _, e := range s.entities {
 		nextPosition := engo.Point{X: e.SpaceComponent.Position.X + e.WalkComponent.Point.X, Y: e.SpaceComponent.Position.Y + e.WalkComponent.Point.Y}
 
-		if nextPosition.Within(s.land) {
+		if s.land.CanMove(nextPosition.X+e.Offset.X, nextPosition.Y+e.Offset.Y+e.SpaceComponent.Height/2) {
 			e.SpaceComponent.Position = nextPosition
 		}
 	}

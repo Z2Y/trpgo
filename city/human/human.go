@@ -51,14 +51,14 @@ func NewHuman(point engo.Point) *Human {
 
 	entity.RenderComponent = common.RenderComponent{
 		Drawable:    DefaultAnimation.Drawables[0],
-		Scale:       engo.Point{X: 0.5, Y: 0.5},
+		Scale:       engo.Point{X: 0.25, Y: 0.25},
 		StartZIndex: 1,
 	}
 
 	entity.SpaceComponent = common.SpaceComponent{
 		Position: entity.getFixedPosition(point),
-		Width:    64,
-		Height:   64,
+		Width:    30,
+		Height:   30,
 	}
 
 	entity.AnimationComponent = *DefaultAnimation
@@ -70,12 +70,12 @@ func NewHuman(point engo.Point) *Human {
 }
 
 func (h *Human) getFixedPosition(point engo.Point) engo.Point {
-	center := getCenterOfRender(h.RenderComponent)
+	center := getFootOffset(h.RenderComponent)
 	h.Offset = center
 	return engo.Point{X: point.X - center.X, Y: point.Y - center.Y}
 }
 
-func getCenterOfRender(render common.RenderComponent) engo.Point {
+func getFootOffset(render common.RenderComponent) engo.Point {
 	width := render.Drawable.Width() * render.Scale.X
 	height := render.Drawable.Height() * render.Scale.Y
 	return engo.Point{X: width / 2, Y: height / 2}
@@ -108,9 +108,9 @@ func (h *Human) UpdateFace() {
 		return
 	}
 	if h.ActionState.Speed.X < 0 {
-		h.RenderComponent.Scale.X = -0.5
+		h.RenderComponent.Scale.X = -0.25
 	} else {
-		h.RenderComponent.Scale.X = 0.5
+		h.RenderComponent.Scale.X = 0.25
 	}
 	offset := h.Offset
 
