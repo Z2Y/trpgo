@@ -89,9 +89,8 @@ func (w *WorldSystem) generateTrees(height_map *mapgenerator.HeightMap, width, h
 						Height: gridSize,
 					}
 					render := &common.RenderComponent{
-						Drawable:    Entitys[Trees[code]].Drawable,
-						Scale:       Entitys[Trees[code]].Scale,
-						StartZIndex: 2,
+						Drawable: Entitys[Trees[code]].Drawable,
+						Scale:    Entitys[Trees[code]].Scale,
 					}
 					ground := w.ground[x][y]
 					if ground != nil {
@@ -113,14 +112,14 @@ func (w *WorldSystem) generateBuildings(height_map *mapgenerator.HeightMap, widt
 					Height: gridSize,
 				}
 				render := &common.RenderComponent{
-					Drawable:    Entitys[Buildings[code]].Drawable,
-					Scale:       Entitys[Buildings[code]].Scale,
-					StartZIndex: 2,
+					Drawable: Entitys[Buildings[code]].Drawable,
+					Scale:    Entitys[Buildings[code]].Scale,
 				}
 				ground := w.ground[x][y]
 				if ground != nil {
 					ground.SubEntites = append(ground.SubEntites, AlignEntityToGrid(&Entity{BasicEntity: ecs.NewBasic(), RenderComponent: render, SpaceComponent: space, X: x, Y: y, Width: 1, Height: 1}))
 				}
+
 			}
 		}
 	}
@@ -166,11 +165,17 @@ func (w *WorldSystem) Contains(point engo.Point) bool {
 	return point.X > bounds.Min.X && point.X < bounds.Max.X && point.Y > bounds.Min.Y && point.Y < bounds.Max.Y
 }
 
-func (w *WorldSystem) CanMove(x, y float32) bool {
+func (w *WorldSystem) GetGridPos(x, y float32) (int, int) {
 	py := int((x+2*y)/gridSize - 0.5)
 	px := int((x-2*y)/gridSize + 0.5)
-	grid := w.ground[px][py]
-	return (grid != nil && grid.Code != Waters[0])
+	return px, py
+}
+
+func (w *WorldSystem) GetGrid(x, y int) *Grid {
+	if w.ground[x] == nil {
+		return nil
+	}
+	return w.ground[x][y]
 }
 
 func (w *WorldSystem) Update(float32) {

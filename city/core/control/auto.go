@@ -18,6 +18,7 @@ const ACTION_MESSAGE = "ActionMessage"
 type ActionEntity struct {
 	ecs.BasicEntity
 	common.SpaceComponent
+	common.RenderComponent
 	WalkComponent
 
 	Offset engo.Point

@@ -71,10 +71,34 @@ func (s *WalkSystem) Remove(basic ecs.BasicEntity) {
 
 func (s *WalkSystem) Update(dt float32) {
 	for _, e := range s.entities {
+		if e.WalkComponent.Point.X == 0 && e.WalkComponent.Point.Y == 0 {
+			continue
+		}
 		nextPosition := engo.Point{X: e.SpaceComponent.Position.X + e.WalkComponent.Point.X, Y: e.SpaceComponent.Position.Y + e.WalkComponent.Point.Y}
+		footX, footY := nextPosition.X+e.Offset.X, nextPosition.Y+e.Offset.Y+e.SpaceComponent.Height/2
+		gx, gy := s.land.GetGridPos(footX, footY)
 
-		if s.land.CanMove(nextPosition.X+e.Offset.X, nextPosition.Y+e.Offset.Y+e.SpaceComponent.Height/2) {
-			e.SpaceComponent.Position = nextPosition
+		grid := s.land.GetGrid(gx, gy)
+
+		if grid == nil || grid.Blocked() {
+			continue
+		}
+
+		ox, oy := s.land.GetGridPos(e.SpaceComponent.Position.X+e.Offset.X, e.SpaceComponent.Position.Y+e.Offset.Y)
+		e.SpaceComponent.Position = nextPosition
+
+		if ox != gx || oy != gy {
+			e.RenderComponent.SetZIndex(footY)
+			continue
+		}
+
+		for x := gx - 1; x <= gx+1; x++ {
+			for y := gy - 1; y < gy+1; y++ {
+				grid := s.land.GetGrid(x, y)
+				if grid != nil && len(grid.SubEntites) > 0 {
+					e.RenderComponent.SetZIndex(footY)
+				}
+			}
 		}
 	}
 }

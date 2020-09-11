@@ -1,6 +1,8 @@
 package core
 
 import (
+	"math"
+
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
 	"github.com/Z2Y/trpgo/city/asset"
@@ -44,7 +46,7 @@ func InitRenderComponents() {
 	land := common.NewSpritesheetFromFile("land.png", 64, 64)
 	landScale := engo.Point{X: 1, Y: 1}
 	for i, cell := range land.Cells() {
-		RegistRenderComponent(i, &common.RenderComponent{Scale: landScale, Drawable: cell})
+		RegistRenderComponent(i, &common.RenderComponent{Scale: landScale, Drawable: cell, StartZIndex: -math.MaxFloat32})
 	}
 
 	treeScale := engo.Point{X: 0.5, Y: 0.5}

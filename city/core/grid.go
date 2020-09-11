@@ -23,8 +23,25 @@ type Entity struct {
 	*common.RenderComponent
 	*common.SpaceComponent
 
+	Offset        engo.Point
 	X, Y          int
 	Width, Height int
+}
+
+func (g *Grid) Blocked() bool {
+	if g.Code == Waters[0] {
+		return true
+	}
+	for _, e := range g.SubEntites {
+		if e.Width > 0 && e.Height > 0 {
+			return true
+		}
+	}
+	return false
+}
+
+func (e *Entity) GetZIndex() float32 {
+	return e.RenderComponent.StartZIndex
 }
 
 func AlignEntityToGrid(e *Entity) *Entity {
@@ -36,14 +53,17 @@ func AlignEntityToGrid(e *Entity) *Entity {
 
 	if e.Width == 0 || e.Height == 0 {
 		gridCenter := getGridCenter(e.X, e.Y, 1, 1)
-		entityFooter := getEntityFooter(e.RenderComponent)
-		e.SpaceComponent.Position = engo.Point{X: gridCenter.X - entityFooter.X, Y: gridCenter.Y - entityFooter.Y}
+		e.Offset = getEntityFooter(e.RenderComponent)
+		e.SpaceComponent.Position = engo.Point{X: gridCenter.X - e.Offset.X, Y: gridCenter.Y - e.Offset.Y}
+		e.RenderComponent.StartZIndex = gridCenter.Y
 	} else {
 		scale := float32((1+e.Width)*gridSize/2) / drawable.Width()
 		e.RenderComponent.Scale = engo.Point{X: scale, Y: scale}
 		entityFooter := getEntityFooter(e.RenderComponent)
 		gridCenter := getGridCenter(e.X, e.Y, e.Width, e.Height)
-		e.SpaceComponent.Position = engo.Point{X: gridCenter.X - entityFooter.X, Y: gridCenter.Y - entityFooter.Y + float32((1+e.Height)*gridSize/8)}
+		e.Offset = engo.Point{X: entityFooter.X, Y: entityFooter.Y - float32((1+e.Height)*gridSize/8)}
+		e.SpaceComponent.Position = engo.Point{X: gridCenter.X - e.Offset.X, Y: gridCenter.Y - e.Offset.Y}
+		e.RenderComponent.StartZIndex = gridCenter.Y
 	}
 	return e
 }

@@ -18,7 +18,6 @@ var (
 type Human struct {
 	control.ActionEntity
 	common.AnimationComponent
-	common.RenderComponent
 
 	CurrentAnimation *common.AnimationComponent
 }
