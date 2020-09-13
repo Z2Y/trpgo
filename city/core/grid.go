@@ -52,7 +52,7 @@ func AlignEntityToGrid(e *Entity) *Entity {
 	drawable := e.RenderComponent.Drawable
 
 	if e.Width == 0 || e.Height == 0 {
-		gridCenter := getGridCenter(e.X, e.Y, 1, 1)
+		gridCenter := GridCenter(e.X, e.Y, 1, 1)
 		e.Offset = getEntityFooter(e.RenderComponent)
 		e.SpaceComponent.Position = engo.Point{X: gridCenter.X - e.Offset.X, Y: gridCenter.Y - e.Offset.Y}
 		e.RenderComponent.StartZIndex = gridCenter.Y
@@ -60,7 +60,7 @@ func AlignEntityToGrid(e *Entity) *Entity {
 		scale := float32((1+e.Width)*gridSize/2) / drawable.Width()
 		e.RenderComponent.Scale = engo.Point{X: scale, Y: scale}
 		entityFooter := getEntityFooter(e.RenderComponent)
-		gridCenter := getGridCenter(e.X, e.Y, e.Width, e.Height)
+		gridCenter := GridCenter(e.X, e.Y, e.Width, e.Height)
 		e.Offset = engo.Point{X: entityFooter.X, Y: entityFooter.Y - float32((1+e.Height)*gridSize/8)}
 		e.SpaceComponent.Position = engo.Point{X: gridCenter.X - e.Offset.X, Y: gridCenter.Y - e.Offset.Y}
 		e.RenderComponent.StartZIndex = gridCenter.Y
@@ -74,6 +74,12 @@ func getEntityFooter(render *common.RenderComponent) engo.Point {
 	return engo.Point{X: width / 2, Y: height}
 }
 
-func getGridCenter(x, y, width, height int) engo.Point {
+func GridCenter(x, y, width, height int) engo.Point {
 	return engo.Point{X: float32(x*(gridSize/2) + y*gridSize/2 + (1+width)*gridSize/4), Y: float32(y*gridSize/4 - x*gridSize/4 + (1+height)*gridSize/8)}
+}
+
+func GridIndex(x, y float32) (int, int) {
+	py := int((x+2*y)/gridSize - 0.5)
+	px := int((x-2*y)/gridSize + 0.5)
+	return px, py
 }

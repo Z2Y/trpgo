@@ -62,6 +62,8 @@ func (g *Game) Setup(u engo.Updater) {
 			sys.Add(&hero.BasicEntity, &hero.AnimationComponent, &hero.RenderComponent)
 		case *control.ControlSystem:
 			sys.Add(&hero.ActionEntity)
+		case *control.AutoActionSystem:
+			sys.Add(&hero.ActionEntity)
 		case *control.WalkSystem:
 			sys.Add(&hero.ActionEntity)
 		}

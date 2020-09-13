@@ -6,6 +6,7 @@ import (
 	"github.com/EngoEngine/engo/common"
 	"github.com/Z2Y/trpgo/city/core"
 	"github.com/Z2Y/trpgo/city/core/input"
+	"github.com/Z2Y/trpgo/city/core/route"
 )
 
 const (
@@ -86,52 +87,11 @@ func (c *ControlSystem) Update(dt float32) {
 	for {
 		ok := c.touchHandler.Update()
 		if c.hero != nil {
-			c.updateHero(dt)
 			c.followHero()
+			c.routeToMousePoint()
 		}
 		if !ok {
 			break
-		}
-	}
-}
-
-func (c *ControlSystem) updateHero(dt float32) {
-	speed := engo.Point{X: 0, Y: 0}
-	if engo.Input.Button(UpButton).Down() {
-		speed.Y -= 1
-	}
-	if engo.Input.Button(LeftButton).Down() {
-		speed.X -= 1
-	}
-	if engo.Input.Button(RightButton).Down() {
-		speed.X += 1
-	}
-	if engo.Input.Button(DownButton).Down() {
-		speed.Y += 1
-	}
-
-	preState := c.hero.ActionState.Code
-	c.hero.ActionState.elapsed += dt
-
-	if speed.X != c.hero.ActionState.Speed.X || speed.Y != c.hero.ActionState.Speed.Y {
-		if speed.X == 0 && speed.Y == 0 {
-			c.hero.ActionState.Code = ActionIdle
-		} else {
-			c.hero.ActionState.Code = ActionWalking
-		}
-		c.hero.ActionState.elapsed = 0
-		c.hero.ActionState.duration = 0.2
-		c.hero.ActionState.Speed = speed
-	}
-
-	switch c.hero.ActionState.Code {
-	case ActionIdle:
-		if preState != ActionIdle {
-			engo.Mailbox.Dispatch(ActionMessage{BasicEntity: &c.hero.BasicEntity, State: c.hero.ActionState})
-		}
-	case ActionWalking:
-		if c.hero.ActionState.elapsed == 0 {
-			engo.Mailbox.Dispatch(ActionMessage{BasicEntity: &c.hero.BasicEntity, State: c.hero.ActionState})
 		}
 	}
 }
@@ -147,7 +107,26 @@ func (c *ControlSystem) followHero() {
 	if engo.Input.Mouse.ScrollY != 0 {
 		engo.Mailbox.Dispatch(common.CameraMessage{Axis: common.ZAxis, Value: (engo.Input.Mouse.ScrollY * c.ZoomSpeed), Incremental: true})
 	}
+}
 
+func (c *ControlSystem) routeToMousePoint() {
+	var (
+		mouseX = engo.Input.Mouse.X*c.camera.Z() + (c.camera.X()-(engo.GameWidth()/2)*c.camera.Z()+(engo.ResizeXOffset/2))/engo.GetGlobalScale().X
+		mouseY = engo.Input.Mouse.Y*c.camera.Z() + (c.camera.Y()-(engo.GameHeight()/2)*c.camera.Z()+(engo.ResizeYOffset/2))/engo.GetGlobalScale().Y
+	)
+
+	if engo.Input.Mouse.Action == engo.Press {
+		gx, gy := c.grid.GetGridPos(mouseX, mouseY)
+
+		footX, footY := c.grid.GetGridPos(c.hero.SpaceComponent.Position.X+c.hero.Offset.X, c.hero.SpaceComponent.Position.Y+c.hero.Offset.Y+c.hero.SpaceComponent.Height/2)
+		router := &route.AstarRoute{World: c.grid}
+		if c.hero.ActionState.Route != nil {
+			c.hero.ActionState.Route.Parent = nil
+			footX, footY = c.grid.GetGridPos(c.hero.ActionState.Route.Point.X, c.hero.ActionState.Route.Point.Y)
+		}
+		path := router.FindPath(engo.Point{X: float32(footX), Y: float32(footY)}, engo.Point{X: float32(gx), Y: float32(gy)})
+		c.hero.ActionState.NextRoute = path.Reserve()
+	}
 }
 
 func (c *ControlSystem) TrackCamera() {

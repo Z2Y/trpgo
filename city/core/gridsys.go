@@ -147,7 +147,7 @@ func (w *WorldSystem) getGridPos(x, y, z float32) (int, int, int) {
 	return px, py, pz
 }
 
-func (w *WorldSystem) inView(x, y int) bool {
+func (w *WorldSystem) InView(x, y int) bool {
 	return (x >= w.cameraX-w.viewLenX && x < w.cameraX+w.viewLenX) &&
 		(y >= w.cameraY-w.viewLenY && y < w.cameraY+w.viewLenY)
 }
@@ -191,7 +191,7 @@ func (w *WorldSystem) Update(float32) {
 		for i := lastCameraX - lastViewLenX; i < lastCameraX+lastViewLenX; i++ {
 			for j := lastCameraY - lastViewLenY; j < lastCameraY+lastViewLenY; j++ {
 				grid := w.ground[i][j]
-				if grid != nil && !w.inView(i, j) {
+				if grid != nil && !w.InView(i, j) {
 					w.renderer.Remove(grid.BasicEntity)
 					if grid.SubEntites != nil {
 						for _, e := range grid.SubEntites {

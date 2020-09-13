@@ -6,11 +6,7 @@ import (
 	"github.com/Z2Y/trpgo/city/core"
 )
 
-const WALK_MESSAGE = "WALK_MESSAGE"
-
-type WalkComponent struct {
-	engo.Point
-}
+var WALK_SPEED_SCALE = float32(96)
 
 type WalkSystem struct {
 	ids      map[uint64]struct{}
@@ -27,21 +23,6 @@ func (s *WalkSystem) New(w *ecs.World) {
 			s.land = sys
 		}
 	}
-
-	s.listen()
-}
-
-func (s *WalkSystem) listen() {
-	engo.Mailbox.Listen(ACTION_MESSAGE, func(message engo.Message) {
-		msg, isAction := message.(ActionMessage)
-		if isAction {
-			for _, e := range s.entities {
-				if e.ID() == msg.BasicEntity.ID() {
-					e.WalkComponent.Point = msg.State.Speed
-				}
-			}
-		}
-	})
 }
 
 func (s *WalkSystem) inBound() {
@@ -71,11 +52,25 @@ func (s *WalkSystem) Remove(basic ecs.BasicEntity) {
 
 func (s *WalkSystem) Update(dt float32) {
 	for _, e := range s.entities {
-		if e.WalkComponent.Point.X == 0 && e.WalkComponent.Point.Y == 0 {
+		if e.ActionState.Speed.X == 0 && e.ActionState.Speed.Y == 0 {
 			continue
 		}
-		nextPosition := engo.Point{X: e.SpaceComponent.Position.X + e.WalkComponent.Point.X, Y: e.SpaceComponent.Position.Y + e.WalkComponent.Point.Y}
+
+		speedScale := dt * WALK_SPEED_SCALE
+		speed := e.ActionState.Speed
+		speed.MultiplyScalar(speedScale)
+		nextPosition := engo.Point{X: e.SpaceComponent.Position.X + speed.X, Y: e.SpaceComponent.Position.Y + speed.Y}
+
+		if e.ActionState.Route != nil {
+			dest := engo.Point{X: e.ActionState.Route.Point.X - e.Offset.X, Y: e.ActionState.Route.Point.Y - e.Offset.Y - e.SpaceComponent.Height/2}
+			if nextPosition.PointDistance(dest) < speedScale {
+				e.ActionState.elapsed = e.ActionState.duration
+				nextPosition = dest
+			}
+		}
+
 		footX, footY := nextPosition.X+e.Offset.X, nextPosition.Y+e.Offset.Y+e.SpaceComponent.Height/2
+
 		gx, gy := s.land.GetGridPos(footX, footY)
 
 		grid := s.land.GetGrid(gx, gy)
