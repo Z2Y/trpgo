@@ -2,6 +2,7 @@ package scene
 
 import (
 	"image/color"
+	"log"
 
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
@@ -11,6 +12,7 @@ import (
 	"github.com/Z2Y/trpgo/city/core"
 	"github.com/Z2Y/trpgo/city/core/control"
 	"github.com/Z2Y/trpgo/city/core/ui"
+	"github.com/Z2Y/trpgo/city/core/ui/layout"
 	"github.com/Z2Y/trpgo/city/human"
 )
 
@@ -43,7 +45,7 @@ func (g *Game) Setup(u engo.Updater) {
 
 	g.world = &core.WorldSystem{}
 	g.world.LoadWorldMap(&core.SampleWorldMap)
-	ui.SetDefaultFont("font/CN.ttf")
+	// ui.SetDefaultFont("font/CN.ttf")
 
 	hero := human.NewHuman(g.world.Center())
 
@@ -53,6 +55,8 @@ func (g *Game) Setup(u engo.Updater) {
 	w.AddSystem(g.world)
 	w.AddSystem(&control.ControlSystem{ZoomSpeed: -0.125})
 	w.AddSystem(&control.AutoActionSystem{})
+
+	g.SetupUI(w)
 
 	for _, system := range w.Systems() {
 		switch sys := system.(type) {
@@ -68,6 +72,25 @@ func (g *Game) Setup(u engo.Updater) {
 			sys.Add(&hero.ActionEntity)
 		}
 	}
+}
+
+func (g *Game) SetupUI(w *ecs.World) {
+	w.AddSystemInterface(&ui.UISystem{}, ui.UIEntityFace, nil)
+
+	buttonFnt := ui.NewTextFont("font/CN.ttf", 12)
+
+	buttonBg := asset.LoadedSubSprite("blue_button00.png")
+	text := ui.NewText(ui.Text{Value: "系统", Font: buttonFnt})
+	button := ui.NewButton(ui.Button{Text: text, Image: buttonBg, Width: 40, Height: 20})
+
+	w.AddEntity(button)
+	w.AddEntity(text)
+
+	button.SetPosition(layout.AlignToWorldRightBottom(button.SpaceComponent.AABB(), 8, 8))
+
+	button.OnClick(func() {
+		log.Println("系统 cliced")
+	})
 }
 
 func (g *Game) Type() string {

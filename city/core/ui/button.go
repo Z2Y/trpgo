@@ -39,12 +39,12 @@ func NewButton(b Button) *Button {
 	}
 
 	b.RenderComponent = common.RenderComponent{
-		Drawable: b.Image,
-		Scale:    engo.Point{X: b.Width / b.Image.Width(), Y: b.Height / b.Image.Height()},
+		Drawable:    b.Image,
+		Scale:       engo.Point{X: b.Width / b.Image.Width(), Y: b.Height / b.Image.Height()},
+		StartZIndex: UILayerIndex,
 	}
 
 	b.SetShader(common.HUDShader)
-	b.SetZIndex(UILayerIndex)
 
 	if b.Text != nil {
 		b.alignText()

@@ -57,7 +57,7 @@ func AlignEntityToGrid(e *Entity) *Entity {
 		e.SpaceComponent.Position = engo.Point{X: gridCenter.X - e.Offset.X, Y: gridCenter.Y - e.Offset.Y}
 		e.RenderComponent.StartZIndex = gridCenter.Y
 	} else {
-		scale := float32((1+e.Width)*gridSize/2) / drawable.Width()
+		scale := float32((e.Width+e.Height)*gridSize/2) / drawable.Width()
 		e.RenderComponent.Scale = engo.Point{X: scale, Y: scale}
 		entityFooter := getEntityFooter(e.RenderComponent)
 		gridCenter := GridCenter(e.X, e.Y, e.Width, e.Height)

@@ -27,7 +27,8 @@ func (s *MainMenu) Setup(u engo.Updater) {
 	w := u.(*ecs.World)
 
 	common.SetBackground(background)
-	ui.SetDefaultFont("font/CN.ttf")
+	engo.Window.SetAspectRatio(667, 375)
+	ui.SetDefaultFont("font/CN.ttf", 24)
 	w.AddSystem(&common.RenderSystem{})
 	w.AddSystemInterface(&ui.UISystem{}, ui.UIEntityFace, nil)
 

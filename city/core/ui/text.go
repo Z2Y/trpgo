@@ -11,7 +11,7 @@ import (
 
 var (
 	DefaultFont    *common.Font
-	TextLayerIndex = float32(100)
+	TextLayerIndex = float32(UILayerIndex + 1)
 )
 
 type Text struct {
@@ -38,9 +38,9 @@ func NewText(text Text) *Text {
 	}
 
 	text.RenderComponent.Drawable = text.Font.Render(text.Value)
+	text.RenderComponent.StartZIndex = TextLayerIndex
 
 	text.SetShader(common.HUDShader)
-	text.SetZIndex(TextLayerIndex)
 
 	return &text
 }
@@ -75,17 +75,20 @@ func (t *Text) update() error {
 	return nil
 }
 
-func SetDefaultFont(URL string) {
+func SetDefaultFont(URL string, size float64) {
+	DefaultFont = NewTextFont(URL, size)
+}
+
+func NewTextFont(URL string, size float64) *common.Font {
 	fnt := &common.Font{
 		URL:  URL,
 		FG:   color.White,
-		Size: 24,
+		Size: size,
 	}
 	err := fnt.CreatePreloaded()
 
 	if err != nil {
 		panic(err)
 	}
-
-	DefaultFont = fnt
+	return fnt
 }

@@ -29,7 +29,6 @@ func Start(width, height int) {
 		MobileHeight:  height,
 		FPSLimit:      120,
 		ScaleOnResize: true,
-		NotResizable:  true,
 		GlobalScale:   engo.Point{X: gameScale, Y: gameScale},
 	}
 

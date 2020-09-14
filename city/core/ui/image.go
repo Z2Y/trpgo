@@ -26,12 +26,12 @@ func NewImage(img Image) *Image {
 	}
 
 	img.RenderComponent = common.RenderComponent{
-		Drawable: img.Texture,
-		Scale:    engo.Point{X: img.Width / img.Texture.Width(), Y: img.Height / img.Texture.Height()},
+		Drawable:    img.Texture,
+		Scale:       engo.Point{X: img.Width / img.Texture.Width(), Y: img.Height / img.Texture.Height()},
+		StartZIndex: UILayerIndex,
 	}
 
 	img.SetShader(common.HUDShader)
-	img.SetZIndex(UILayerIndex)
 
 	return &img
 }
