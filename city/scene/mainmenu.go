@@ -34,8 +34,8 @@ func (s *MainMenu) Setup(u engo.Updater) {
 
 	buttonBg := asset.LoadedSubSprite("blue_button00.png")
 	text := ui.NewText(ui.Text{Value: "开始游戏"})
-	button := ui.NewButton(ui.Button{Text: text, Image: buttonBg, Width: 100, Height: 36})
-	background := ui.NewImage(ui.Image{Texture: asset.LoadedSprite("background.jpg"), Width: engo.WindowWidth() / engo.GetGlobalScale().X, Height: engo.WindowHeight() / engo.GetGlobalScale().Y})
+	button := ui.NewButton(ui.Button{Text: text, Image: buttonBg, UIBasic: ui.UIBasic{Width: 100, Height: 36}})
+	background := ui.NewImage(ui.Image{Texture: asset.LoadedSprite("background.jpg"), UIBasic: ui.UIBasic{Width: engo.WindowWidth() / engo.GetGlobalScale().X, Height: engo.WindowHeight() / engo.GetGlobalScale().Y}})
 
 	button.SetPosition(layout.AlignToWorldCenter(button.SpaceComponent.AABB()))
 	background.SetPosition(layout.AlignToWorldCenter(background.SpaceComponent.AABB()))
@@ -47,6 +47,5 @@ func (s *MainMenu) Setup(u engo.Updater) {
 
 	w.AddEntity(background)
 	w.AddEntity(button)
-	w.AddEntity(text)
 
 }

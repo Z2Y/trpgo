@@ -20,6 +20,11 @@ func AlignRightBottom(parent engo.AABB, child engo.AABB, right, bottom float32) 
 	return engo.Point{X: parent.Max.X - right - cWidth, Y: parent.Max.Y - bottom - cHeight}
 }
 
+func AlignRightTop(parent engo.AABB, child engo.AABB, right, top float32) engo.Point {
+	cWidth := (child.Max.X - child.Min.X)
+	return engo.Point{X: parent.Max.X - right - cWidth, Y: parent.Min.Y + top}
+}
+
 func AlignToWorldCenter(child engo.AABB) engo.Point {
 	p := engo.AABB{Max: engo.Point{X: engo.WindowWidth() / engo.GetGlobalScale().X, Y: engo.WindowHeight() / engo.GetGlobalScale().Y}}
 	return AlignCenter(p, child)

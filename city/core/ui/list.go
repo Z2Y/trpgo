@@ -12,8 +12,6 @@ type List struct {
 	Background *common.Texture
 
 	Position engo.Point
-	Width    float32
-	Height   float32
 
 	Items []*UIBasic
 }
@@ -34,4 +32,3 @@ func NewList(l List) *List {
 
 	return &l
 }
-

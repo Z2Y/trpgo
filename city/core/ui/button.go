@@ -13,19 +13,7 @@ type Button struct {
 	Image        *common.Texture
 	ImagePressed *common.Texture
 
-	Position  engo.Point
-	Width     float32
-	Height    float32
 	TextAlign int
-}
-
-func (b *Button) OnClick(f func()) {
-	if b.MessageListener == nil {
-		b.MessageListener = &engo.MessageManager{}
-	}
-	b.MessageListener.Listen("UIMouseEvent", func(engo.Message) {
-		f()
-	})
 }
 
 func NewButton(b Button) *Button {
@@ -33,9 +21,8 @@ func NewButton(b Button) *Button {
 	b.BasicEntity = ecs.NewBasic()
 
 	b.SpaceComponent = common.SpaceComponent{
-		Position: b.Position,
-		Width:    b.Width,
-		Height:   b.Height,
+		Width:  b.Width,
+		Height: b.Height,
 	}
 
 	b.RenderComponent = common.RenderComponent{
@@ -45,20 +32,14 @@ func NewButton(b Button) *Button {
 	}
 
 	b.SetShader(common.HUDShader)
+	b.EventResponder = true
 
 	if b.Text != nil {
 		b.alignText()
+		b.AddSubEntity(b.Text)
 	}
 
 	return &b
-}
-
-func (b *Button) SetPosition(pos engo.Point) {
-	b.Position = pos
-	b.SpaceComponent.Position = pos
-	if b.Text != nil {
-		b.alignText()
-	}
 }
 
 func (b *Button) alignText() {

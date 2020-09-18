@@ -5,7 +5,6 @@ import (
 	"image/color"
 
 	"github.com/EngoEngine/ecs"
-	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
 )
 
@@ -16,9 +15,9 @@ var (
 
 type Text struct {
 	UIBasic
-	Font     *common.Font
-	Position engo.Point
-	Value    string
+	Font *common.Font
+
+	Value string
 }
 
 func NewText(text Text) *Text {
@@ -32,9 +31,8 @@ func NewText(text Text) *Text {
 	width, height, _ := text.Font.TextDimensions(text.Value)
 
 	text.SpaceComponent = common.SpaceComponent{
-		Width:    float32(width),
-		Height:   float32(height),
-		Position: text.Position,
+		Width:  float32(width),
+		Height: float32(height),
 	}
 
 	text.RenderComponent.Drawable = text.Font.Render(text.Value)

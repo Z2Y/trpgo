@@ -2,6 +2,7 @@ package ui
 
 import (
 	"math"
+	"sort"
 
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
@@ -12,6 +13,7 @@ import (
 var (
 	UIEntityFace     *UIFace
 	UILayerIndex     = float32(1e4)
+	UIPopLayerIndex  = float32(2e4)
 	UISystemPriority = 1000
 )
 
@@ -20,25 +22,95 @@ type UIBasic struct {
 	common.RenderComponent
 	common.SpaceComponent
 
+	Width           float32
+	Height          float32
+	SubEntities     []*UIBasic
 	MessageListener *engo.MessageManager
+
+	EventResponder bool //是否处理事件
 }
 
 func (u *UIBasic) GetComponentUI() *UIBasic {
 	return u
 }
 
+func (u *UIBasic) AddSubEntity(e UIFace) {
+	u.SubEntities = append(u.SubEntities, e.GetComponentUI())
+}
+
+func (u *UIBasic) SetPosition(pos engo.Point) {
+	if len(u.SubEntities) > 0 {
+		offset := engo.Point{X: u.Position.X, Y: u.Position.Y}
+		offset.Subtract(pos)
+		for _, sub := range u.SubEntities {
+			sub.SetPosition(engo.Point{X: sub.Position.X - offset.X, Y: sub.Position.Y - offset.Y})
+		}
+	}
+
+	u.Position = pos
+}
+
+func (u *UIBasic) SetZIndex(idx float32) {
+	if len(u.SubEntities) > 0 {
+		offset := u.StartZIndex - idx
+		for _, sub := range u.SubEntities {
+			sub.SetZIndex(sub.StartZIndex - offset)
+		}
+	}
+
+	u.StartZIndex = idx
+	u.RenderComponent.SetZIndex(idx)
+}
+
+func (u *UIBasic) OnClick(f func()) {
+	if !u.EventResponder {
+		return
+	}
+	if u.MessageListener == nil {
+		u.MessageListener = &engo.MessageManager{}
+	}
+	u.MessageListener.Listen("UIMouseEvent", func(engo.Message) {
+		f()
+	})
+}
+
 type UIFace interface {
 	GetComponentUI() *UIBasic
+	AddSubEntity(UIFace)
+}
+
+type respondEntityList []*UIBasic
+
+func (r respondEntityList) Len() int {
+	return len(r)
+}
+
+func (r respondEntityList) Less(i, j int) bool {
+	if r[i].StartZIndex != r[j].StartZIndex {
+		return r[i].StartZIndex > r[j].StartZIndex
+	}
+	if r[i].Position.Y != r[j].Position.Y {
+		return r[i].Position.Y > r[j].Position.Y
+	}
+
+	return r[i].Position.X > r[j].Position.X
+}
+
+func (r respondEntityList) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
 }
 
 type UISystem struct {
-	entities     []*UIBasic
+	entities        map[uint64]*UIBasic
+	respondEntities respondEntityList
+
 	touchHandler *input.TouchHandler
 
 	renderer *common.RenderSystem
 	camera   *common.CameraSystem
 
-	cameraY float32
+	cameraY       float32
+	sortingNeeded bool
 }
 
 func (ui *UISystem) New(world *ecs.World) {
@@ -50,7 +122,14 @@ func (ui *UISystem) New(world *ecs.World) {
 			ui.camera = sys
 		}
 	}
+	ui.entities = make(map[uint64]*UIBasic)
 	ui.touchHandler = input.NewTouchHandler()
+	engo.Mailbox.Listen("UICloseEvent", func(message engo.Message) {
+		msg, ok := message.(UICloseEvent)
+		if ok {
+			ui.Remove(msg.Target.BasicEntity)
+		}
+	})
 }
 
 func (*UISystem) Priority() int {
@@ -58,9 +137,21 @@ func (*UISystem) Priority() int {
 }
 
 func (ui *UISystem) Add(entity *UIBasic) {
-	ui.entities = append(ui.entities, entity)
+	if _, ok := ui.entities[entity.ID()]; ok {
+		return
+	}
+	ui.entities[entity.ID()] = entity
 
 	ui.renderer.Add(&entity.BasicEntity, &entity.RenderComponent, &entity.SpaceComponent)
+
+	for _, sub := range entity.SubEntities {
+		ui.Add(sub)
+	}
+
+	if entity.EventResponder {
+		ui.respondEntities = append(ui.respondEntities, entity)
+		ui.sortingNeeded = true
+	}
 }
 
 func (ui *UISystem) AddByInterface(o ecs.Identifier) {
@@ -68,17 +159,34 @@ func (ui *UISystem) AddByInterface(o ecs.Identifier) {
 	ui.Add(face.GetComponentUI())
 }
 
-func (ui *UISystem) Remove(basic ecs.BasicEntity) {
+func (ui *UISystem) removeRespondEntity(basic ecs.BasicEntity) {
 	delete := -1
-	for index, e := range ui.entities {
+	for index, e := range ui.respondEntities {
 		if e.ID() == basic.ID() {
 			delete = index
 			break
 		}
 	}
 	if delete >= 0 {
-		ui.entities = append(ui.entities[:delete], ui.entities[delete+1:]...)
+		ui.respondEntities = append(ui.respondEntities[:delete], ui.respondEntities[delete+1:]...)
+	}
+}
+
+func (ui *UISystem) Remove(basic ecs.BasicEntity) {
+
+	entity, ok := ui.entities[basic.ID()]
+
+	if ok {
+		delete(ui.entities, basic.ID())
+		for _, sub := range entity.SubEntities {
+			ui.Remove(sub.BasicEntity)
+		}
 		ui.renderer.Remove(basic)
+
+		if entity.EventResponder {
+			ui.removeRespondEntity(basic)
+			ui.sortingNeeded = true
+		}
 	}
 }
 
@@ -112,18 +220,26 @@ func (ui *UISystem) update() {
 	if updateZindex {
 		ui.cameraY = ui.camera.Y()
 		zIndexOffset = ui.getUIZIndexOffset()
+		for _, e := range ui.entities {
+			e.SetZIndex(e.StartZIndex + zIndexOffset)
+		}
 	}
 
-	for _, e := range ui.entities {
-		if e.Contains(curPos) && e.MessageListener != nil {
-			if engo.Input.Mouse.Action == engo.Press && engo.Input.Mouse.Button == engo.MouseButtonLeft {
-				e.MessageListener.Dispatch(UIMouseEvent{})
-				resetInput = true
-			}
-		}
+	if ui.sortingNeeded {
+		sort.Sort(ui.respondEntities)
+		ui.sortingNeeded = false
+	}
 
-		if updateZindex {
-			e.SetZIndex(e.StartZIndex + zIndexOffset)
+	if engo.Input.Mouse.Action == engo.Press && engo.Input.Mouse.Button == engo.MouseButtonLeft {
+		for _, e := range ui.respondEntities {
+			if e.Contains(curPos) {
+				if e.MessageListener != nil {
+					e.MessageListener.Dispatch(UIMouseEvent{})
+				}
+
+				resetInput = true
+				break
+			}
 		}
 	}
 

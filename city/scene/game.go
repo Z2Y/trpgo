@@ -81,15 +81,22 @@ func (g *Game) SetupUI(w *ecs.World) {
 
 	buttonBg := asset.LoadedSubSprite("blue_button00.png")
 	text := ui.NewText(ui.Text{Value: "系统", Font: buttonFnt})
-	button := ui.NewButton(ui.Button{Text: text, Image: buttonBg, Width: 40, Height: 20})
+	button := ui.NewButton(ui.Button{Text: text, Image: buttonBg, UIBasic: ui.UIBasic{Width: 40, Height: 20}})
+
+	buildBtn := ui.NewButton(ui.Button{Text: ui.NewText(ui.Text{Value: "建造", Font: buttonFnt}), Image: buttonBg, UIBasic: ui.UIBasic{Width: 40, Height: 20}})
 
 	w.AddEntity(button)
-	w.AddEntity(text)
+	w.AddEntity(buildBtn)
 
 	button.SetPosition(layout.AlignToWorldRightBottom(button.SpaceComponent.AABB(), 8, 8))
+	buildBtn.SetPosition(layout.AlignToWorldRightBottom(buildBtn.SpaceComponent.AABB(), 56, 8))
 
 	button.OnClick(func() {
-		log.Println("系统 cliced")
+		log.Println("系统 clicked")
+
+		panel := ui.NewPanel(ui.Panel{Image: asset.LoadedSubSprite("blue_panel.png"), UIBasic: ui.UIBasic{Width: 400, Height: 300}})
+		modal := ui.NewModal(ui.Modal{Content: panel, UIBasic: ui.UIBasic{Width: engo.WindowWidth() / engo.GetGlobalScale().X, Height: engo.WindowHeight() / engo.GetGlobalScale().Y}})
+		w.AddEntity(modal)
 	})
 }
 

@@ -9,10 +9,7 @@ import (
 type Image struct {
 	UIBasic
 
-	Texture  *common.Texture
-	Position engo.Point
-	Width    float32
-	Height   float32
+	Texture *common.Texture
 }
 
 func NewImage(img Image) *Image {
@@ -20,9 +17,8 @@ func NewImage(img Image) *Image {
 	img.BasicEntity = ecs.NewBasic()
 
 	img.SpaceComponent = common.SpaceComponent{
-		Position: img.Position,
-		Width:    img.Width,
-		Height:   img.Height,
+		Width:  img.Width,
+		Height: img.Height,
 	}
 
 	img.RenderComponent = common.RenderComponent{
@@ -34,9 +30,4 @@ func NewImage(img Image) *Image {
 	img.SetShader(common.HUDShader)
 
 	return &img
-}
-
-func (img *Image) SetPosition(pos engo.Point) {
-	img.Position = pos
-	img.SpaceComponent.Position = pos
 }
