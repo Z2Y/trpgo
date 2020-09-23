@@ -2,6 +2,7 @@ package layout
 
 import (
 	"github.com/EngoEngine/engo"
+	"github.com/Z2Y/trpgo/city/config"
 )
 
 func AlignCenter(parent, child engo.AABB) engo.Point {
@@ -26,11 +27,11 @@ func AlignRightTop(parent engo.AABB, child engo.AABB, right, top float32) engo.P
 }
 
 func AlignToWorldCenter(child engo.AABB) engo.Point {
-	p := engo.AABB{Max: engo.Point{X: engo.WindowWidth() / engo.GetGlobalScale().X, Y: engo.WindowHeight() / engo.GetGlobalScale().Y}}
+	p := engo.AABB{Max: engo.Point{X: float32(config.GameWidth), Y: float32(config.GameHeight)}}
 	return AlignCenter(p, child)
 }
 
 func AlignToWorldRightBottom(child engo.AABB, right, bottom float32) engo.Point {
-	p := engo.AABB{Max: engo.Point{X: engo.WindowWidth() / engo.GetGlobalScale().X, Y: engo.WindowHeight() / engo.GetGlobalScale().Y}}
+	p := engo.AABB{Max: engo.Point{X: float32(config.GameWidth), Y: float32(config.GameHeight)}}
 	return AlignRightBottom(p, child, right, bottom)
 }

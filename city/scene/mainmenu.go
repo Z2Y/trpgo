@@ -2,6 +2,7 @@ package scene
 
 import (
 	"github.com/Z2Y/trpgo/city/asset"
+	"github.com/Z2Y/trpgo/city/config"
 	"github.com/Z2Y/trpgo/city/core/ui"
 	"github.com/Z2Y/trpgo/city/core/ui/layout"
 
@@ -27,7 +28,7 @@ func (s *MainMenu) Setup(u engo.Updater) {
 	w := u.(*ecs.World)
 
 	common.SetBackground(background)
-	engo.Window.SetAspectRatio(667, 375)
+	engo.Window.SetAspectRatio(int(config.GameWidth), int(config.GameHeight))
 	ui.SetDefaultFont("font/CN.ttf", 24)
 	w.AddSystem(&common.RenderSystem{})
 	w.AddSystemInterface(&ui.UISystem{}, ui.UIEntityFace, nil)

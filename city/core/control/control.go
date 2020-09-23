@@ -111,8 +111,8 @@ func (c *ControlSystem) followHero() {
 
 func (c *ControlSystem) routeToMousePoint() {
 	var (
-		mouseX = engo.Input.Mouse.X*c.camera.Z() + (c.camera.X()-(engo.GameWidth()/2)*c.camera.Z()+(engo.ResizeXOffset/2))/engo.GetGlobalScale().X
-		mouseY = engo.Input.Mouse.Y*c.camera.Z() + (c.camera.Y()-(engo.GameHeight()/2)*c.camera.Z()+(engo.ResizeYOffset/2))/engo.GetGlobalScale().Y
+		mouseX = ((engo.Input.Mouse.X * c.camera.Z() * engo.GameWidth() / engo.WindowWidth()) + (c.camera.X()-(engo.GameWidth()/2)*c.camera.Z())/engo.GetGlobalScale().X)
+		mouseY = ((engo.Input.Mouse.Y * c.camera.Z() * engo.GameHeight() / engo.WindowHeight()) + (c.camera.Y()-(engo.GameHeight()/2)*c.camera.Z())/engo.GetGlobalScale().Y)
 	)
 
 	if engo.Input.Mouse.Action == engo.Press {

@@ -9,6 +9,7 @@ import (
 	"github.com/EngoEngine/engo/common"
 
 	"github.com/Z2Y/trpgo/city/asset"
+	"github.com/Z2Y/trpgo/city/config"
 	"github.com/Z2Y/trpgo/city/core"
 	"github.com/Z2Y/trpgo/city/core/control"
 	"github.com/Z2Y/trpgo/city/core/ui"
@@ -95,7 +96,7 @@ func (g *Game) SetupUI(w *ecs.World) {
 		log.Println("系统 clicked")
 
 		panel := ui.NewPanel(ui.Panel{Image: asset.LoadedSubSprite("blue_panel.png"), UIBasic: ui.UIBasic{Width: 400, Height: 300}})
-		modal := ui.NewModal(ui.Modal{Content: panel, UIBasic: ui.UIBasic{Width: engo.WindowWidth() / engo.GetGlobalScale().X, Height: engo.WindowHeight() / engo.GetGlobalScale().Y}})
+		modal := ui.NewModal(ui.Modal{Content: panel, UIBasic: ui.UIBasic{Width: config.GameWidth, Height: config.GameHeight}})
 		w.AddEntity(modal)
 	})
 }

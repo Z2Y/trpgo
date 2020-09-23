@@ -7,6 +7,7 @@ import (
 	"github.com/EngoEngine/ecs"
 	"github.com/EngoEngine/engo"
 	"github.com/EngoEngine/engo/common"
+	"github.com/Z2Y/trpgo/city/config"
 	"github.com/Z2Y/trpgo/city/core/input"
 )
 
@@ -130,6 +131,7 @@ func (ui *UISystem) New(world *ecs.World) {
 			ui.Remove(msg.Target.BasicEntity)
 		}
 	})
+	engo.Mailbox.Listen("WindowResizeMessage", config.UpdateWindowScale)
 }
 
 func (*UISystem) Priority() int {
@@ -212,7 +214,7 @@ func (ui *UISystem) getUIZIndexOffset() float32 {
 }
 
 func (ui *UISystem) update() {
-	curPos := engo.Point{X: engo.Input.Mouse.X, Y: engo.Input.Mouse.Y}
+	curPos := engo.Point{X: engo.Input.Mouse.X / config.WindowScale().X, Y: engo.Input.Mouse.Y / config.WindowScale().Y}
 	updateZindex, zIndexOffset := ui.shouldUpdateIndex(), float32(0)
 
 	resetInput := false

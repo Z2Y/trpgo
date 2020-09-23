@@ -2,25 +2,12 @@ package city
 
 import (
 	"github.com/EngoEngine/engo"
+	"github.com/Z2Y/trpgo/city/config"
 	"github.com/Z2Y/trpgo/city/scene"
 )
 
-var (
-	GameWidth  = 667
-	GameHeight = 375
-)
-
-func getSafeScale(width, height float32) float32 {
-	gameRatio := float32(GameHeight) / float32(GameWidth)
-	safeHeight := width * gameRatio
-	if safeHeight > height {
-		return height / float32(GameHeight)
-	}
-	return width / float32(GameWidth)
-}
-
 func Start(width, height int) {
-	gameScale := getSafeScale(float32(width), float32(height))
+	gameScale := config.GetSafeScale(float32(width), float32(height))
 	opts := engo.RunOptions{
 		Title:         "trpgo",
 		Width:         width,
